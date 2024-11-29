@@ -1,0 +1,2346 @@
+deviceconfig {
+  system {
+    type {
+      static;
+    }
+    update-server updates.paloaltonetworks.com;
+    update-schedule {
+      threats {
+        recurring {
+          weekly {
+            day-of-week wednesday;
+            at 01:02;
+            action download-only;
+          }
+        }
+      }
+    }
+    timezone America/Phoenix;
+    service {
+      disable-telnet yes;
+      disable-http yes;
+    }
+    hostname site01-fw1;
+    ip-address 10.1.92.5;
+    netmask 255.255.255.0;
+    default-gateway 10.1.92.1;
+    dns-setting {
+      servers {
+        primary 10.1.20.8;
+      }
+    }
+    device-telemetry {
+      device-health-performance yes;
+      product-usage yes;
+      threat-prevention yes;
+      region Americas;
+    }
+  }
+  setting {
+    config {
+      rematch yes;
+    }
+    management {
+      hostname-type-in-syslog FQDN;
+    }
+    auto-mac-detect yes;
+  }
+}
+network {
+  interface {
+    ethernet {
+      ethernet1/1 {
+        layer3 {
+          ndp-proxy {
+            enabled no;
+          }
+          sdwan-link-settings {
+            upstream-nat {
+              enable no;
+              static-ip;
+            }
+            enable no;
+          }
+          ip {
+            100.64.1.2/29;
+          }
+          interface-management-profile "ping profile";
+          lldp {
+            enable no;
+          }
+        }
+        comment site01-pub-s1;
+      }
+      ethernet1/2 {
+        layer3 {
+          ndp-proxy {
+            enabled no;
+          }
+          sdwan-link-settings {
+            upstream-nat {
+              enable no;
+              static-ip;
+            }
+            enable no;
+          }
+          ip {
+            10.1.255.1/30;
+          }
+          interface-management-profile "inside profile";
+          lldp {
+            enable no;
+          }
+        }
+        comment site01-core-sw1;
+      }
+    }
+  }
+  profiles {
+    monitor-profile {
+      default {
+        interval 3;
+        threshold 5;
+        action wait-recover;
+      }
+    }
+    interface-management-profile {
+      "ping profile" {
+        ping yes;
+      }
+      "inside profile" {
+        https yes;
+        http-ocsp yes;
+        ssh yes;
+        snmp yes;
+        userid-service yes;
+        userid-syslog-listener-ssl yes;
+        userid-syslog-listener-udp yes;
+        ping yes;
+        response-pages yes;
+      }
+    }
+  }
+  ike {
+    crypto-profiles {
+      ike-crypto-profiles {
+        default {
+          encryption [ aes-128-cbc 3des];
+          hash sha1;
+          dh-group group2;
+          lifetime {
+            hours 8;
+          }
+        }
+        Suite-B-GCM-128 {
+          encryption aes-128-cbc;
+          hash sha256;
+          dh-group group19;
+          lifetime {
+            hours 8;
+          }
+        }
+        Suite-B-GCM-256 {
+          encryption aes-256-cbc;
+          hash sha384;
+          dh-group group20;
+          lifetime {
+            hours 8;
+          }
+        }
+      }
+      ipsec-crypto-profiles {
+        default {
+          esp {
+            encryption [ aes-128-cbc 3des];
+            authentication sha1;
+          }
+          dh-group group2;
+          lifetime {
+            hours 1;
+          }
+        }
+        Suite-B-GCM-128 {
+          esp {
+            encryption aes-128-gcm;
+            authentication none;
+          }
+          dh-group group19;
+          lifetime {
+            hours 1;
+          }
+        }
+        Suite-B-GCM-256 {
+          esp {
+            encryption aes-256-gcm;
+            authentication none;
+          }
+          dh-group group20;
+          lifetime {
+            hours 1;
+          }
+        }
+      }
+      global-protect-app-crypto-profiles {
+        default {
+          encryption aes-128-cbc;
+          authentication sha1;
+        }
+      }
+    }
+  }
+  qos {
+    profile {
+      default {
+        class-bandwidth-type {
+          mbps {
+            class {
+              class1 {
+                priority real-time;
+              }
+              class2 {
+                priority high;
+              }
+              class3 {
+                priority high;
+              }
+              class4 {
+                priority medium;
+              }
+              class5 {
+                priority medium;
+              }
+              class6 {
+                priority low;
+              }
+              class7 {
+                priority low;
+              }
+              class8 {
+                priority low;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  virtual-router {
+    VR1 {
+      ecmp {
+        algorithm {
+          ip-modulo;
+        }
+      }
+      protocol {
+        bgp {
+          routing-options {
+            graceful-restart {
+              enable yes;
+            }
+          }
+          enable no;
+        }
+        rip {
+          enable no;
+        }
+        ospf {
+          enable yes;
+          area {
+            0.0.0.0 {
+              type {
+                normal;
+              }
+              interface {
+                ethernet1/2 {
+                  bfd {
+                    profile Inherit-vr-global-setting;
+                  }
+                  enable yes;
+                  passive no;
+                  gr-delay 10;
+                  metric 10;
+                  priority 1;
+                  hello-interval 10;
+                  dead-counts 4;
+                  retransmit-interval 5;
+                  transit-delay 1;
+                  link-type {
+                    broadcast;
+                  }
+                }
+              }
+            }
+          }
+          router-id 10.1.255.1;
+        }
+        ospfv3 {
+          enable no;
+        }
+      }
+      interface [ ethernet1/1 ethernet1/2];
+      routing-table {
+        ip {
+          static-route {
+            "primary default" {
+              nexthop {
+                ip-address 100.64.1.1;
+              }
+              bfd {
+                profile None;
+              }
+              interface ethernet1/1;
+              metric 10;
+              destination 0.0.0.0/0;
+              route-table {
+                unicast;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+shared {
+  application;
+  application-group;
+  service;
+  service-group;
+  botnet {
+    configuration {
+      http {
+        dynamic-dns {
+          enabled yes;
+          threshold 5;
+        }
+        malware-sites {
+          enabled yes;
+          threshold 5;
+        }
+        recent-domains {
+          enabled yes;
+          threshold 5;
+        }
+        ip-domains {
+          enabled yes;
+          threshold 10;
+        }
+        executables-from-unknown-sites {
+          enabled yes;
+          threshold 5;
+        }
+      }
+      other-applications {
+        irc yes;
+      }
+      unknown-applications {
+        unknown-tcp {
+          destinations-per-hour 10;
+          sessions-per-hour 10;
+          session-length {
+            maximum-bytes 100;
+            minimum-bytes 50;
+          }
+        }
+        unknown-udp {
+          destinations-per-hour 10;
+          sessions-per-hour 10;
+          session-length {
+            maximum-bytes 100;
+            minimum-bytes 50;
+          }
+        }
+      }
+    }
+    report {
+      topn 100;
+      scheduled yes;
+    }
+  }
+  content-preview {
+    application {
+      ai-wordsmith-delete {
+        category business-systems;
+        subcategory artificial-intelligence;
+        technology browser-based;
+        description "AI-Wordsmith is an AI art generator that helps users to generate creative content for website, blog, and social media accounts. This App-ID covers the deleting traffic of the AI-Wordsmith application.";
+        appident yes;
+        vulnerability-ident yes;
+        evasive-behavior no;
+        consume-big-bandwidth no;
+        used-by-malware no;
+        able-to-transfer-file no;
+        has-known-vulnerability yes;
+        tunnel-other-application no;
+        prone-to-misuse no;
+        pervasive-use no;
+        per-direction-regex no;
+        deny-action drop-reset;
+        cachable no;
+        can-disable yes;
+        new-appid yes;
+        is-saas yes;
+        saas {
+          is-data-breaches no;
+          is-ip-based-restrictions no;
+          is-poor-financial-viability no;
+          is-poor-terms-of-service no;
+        }
+        tag [ [Deleting] "[Generative AI]" "[Web App]"];
+        references {
+          HomePage {
+            link https://ai-wordsmith.com/;
+          }
+        }
+        use-applications ai-wordsmith-base;
+        tunnel-applications ctd-dummy;
+        risk 3;
+        parent-app ai-wordsmith-base;
+        preview yes;
+      }
+      ai-wordsmith-base {
+        ottawa-name ai-wordsmith;
+        category business-systems;
+        subcategory artificial-intelligence;
+        technology browser-based;
+        description "AI-Wordsmith is an AI art generator that helps users to generate creative content for website, blog, and social media accounts. This App-ID covers the traffic of the AI-Wordsmith application.";
+        appident yes;
+        virus-ident yes;
+        file-type-ident yes;
+        vulnerability-ident yes;
+        evasive-behavior no;
+        consume-big-bandwidth no;
+        used-by-malware no;
+        able-to-transfer-file yes;
+        has-known-vulnerability yes;
+        tunnel-other-application no;
+        prone-to-misuse no;
+        pervasive-use no;
+        per-direction-regex no;
+        deny-action drop-reset;
+        data-ident yes;
+        cachable no;
+        file-forward yes;
+        can-disable yes;
+        new-appid yes;
+        is-saas yes;
+        saas {
+          is-data-breaches no;
+          is-ip-based-restrictions no;
+          is-poor-financial-viability no;
+          is-poor-terms-of-service no;
+        }
+        tag [ "[Generative AI]" "[Web App]"];
+        references {
+          HomePage {
+            link https://ai-wordsmith.com/;
+          }
+        }
+        use-applications [ google-base ssl web-browsing];
+        tunnel-applications [ ai-wordsmith-delete ai-wordsmith-move ai-wordsmith-save ai-wordsmith-upload];
+        risk 3;
+        application-container ai-wordsmith;
+        parent-app web20_parrent_app;
+        preview yes;
+      }
+      ai-wordsmith {
+        ottawa-name ai-wordsmith;
+        category business-systems;
+        subcategory artificial-intelligence;
+        technology browser-based;
+        description "AI-Wordsmith is an AI art generator that helps users to generate creative content for website, blog, and social media accounts. This App-ID covers the traffic of the AI-Wordsmith application.";
+        appident yes;
+        virus-ident yes;
+        file-type-ident yes;
+        vulnerability-ident yes;
+        evasive-behavior no;
+        consume-big-bandwidth no;
+        used-by-malware no;
+        able-to-transfer-file yes;
+        has-known-vulnerability yes;
+        tunnel-other-application no;
+        prone-to-misuse no;
+        pervasive-use no;
+        per-direction-regex no;
+        deny-action drop-reset;
+        data-ident yes;
+        cachable no;
+        file-forward yes;
+        can-disable yes;
+        new-appid yes;
+        is-saas yes;
+        saas {
+          is-data-breaches no;
+          is-ip-based-restrictions no;
+          is-poor-financial-viability no;
+          is-poor-terms-of-service no;
+        }
+        tag [ "[Generative AI]" "[Web App]"];
+        references {
+          HomePage {
+            link https://ai-wordsmith.com/;
+          }
+        }
+        use-applications [ google-base ssl web-browsing];
+        tunnel-applications [ ai-wordsmith-delete ai-wordsmith-move ai-wordsmith-save ai-wordsmith-upload];
+        risk 3;
+        application-container ai-wordsmith;
+        parent-app web20_parrent_app;
+        preview yes;
+      }
+      ai-wordsmith-move {
+        category business-systems;
+        subcategory artificial-intelligence;
+        technology browser-based;
+        description "AI-Wordsmith is an AI art generator that helps users to generate creative content for website, blog, and social media accounts. This App-ID covers the moving traffic of the AI-Wordsmith application.";
+        appident yes;
+        vulnerability-ident yes;
+        evasive-behavior no;
+        consume-big-bandwidth no;
+        used-by-malware no;
+        able-to-transfer-file no;
+        has-known-vulnerability yes;
+        tunnel-other-application no;
+        prone-to-misuse no;
+        pervasive-use no;
+        per-direction-regex no;
+        deny-action drop-reset;
+        cachable no;
+        can-disable yes;
+        new-appid yes;
+        is-saas yes;
+        saas {
+          is-data-breaches no;
+          is-ip-based-restrictions no;
+          is-poor-financial-viability no;
+          is-poor-terms-of-service no;
+        }
+        tag [ "[Generative AI]" "[Web App]"];
+        references {
+          HomePage {
+            link https://ai-wordsmith.com/;
+          }
+        }
+        use-applications ai-wordsmith-base;
+        tunnel-applications ctd-dummy;
+        risk 3;
+        parent-app ai-wordsmith-base;
+        preview yes;
+      }
+      ai-wordsmith-save {
+        category business-systems;
+        subcategory artificial-intelligence;
+        technology browser-based;
+        description "AI-Wordsmith is an AI art generator that helps users to generate creative content for website, blog, and social media accounts. This App-ID covers the saving traffic of the AI-Wordsmith application.";
+        appident yes;
+        vulnerability-ident yes;
+        evasive-behavior no;
+        consume-big-bandwidth no;
+        used-by-malware no;
+        able-to-transfer-file no;
+        has-known-vulnerability yes;
+        tunnel-other-application no;
+        prone-to-misuse no;
+        pervasive-use no;
+        per-direction-regex no;
+        deny-action drop-reset;
+        cachable no;
+        can-disable yes;
+        new-appid yes;
+        is-saas yes;
+        saas {
+          is-data-breaches no;
+          is-ip-based-restrictions no;
+          is-poor-financial-viability no;
+          is-poor-terms-of-service no;
+        }
+        tag [ "[Generative AI]" "[Web App]"];
+        references {
+          HomePage {
+            link https://ai-wordsmith.com/;
+          }
+        }
+        use-applications ai-wordsmith-base;
+        tunnel-applications ctd-dummy;
+        risk 3;
+        parent-app ai-wordsmith-base;
+        preview yes;
+      }
+      ai-wordsmith-upload {
+        category business-systems;
+        subcategory artificial-intelligence;
+        technology browser-based;
+        description "AI-Wordsmith is an AI art generator that helps users to generate creative content for website, blog, and social media accounts. This App-ID covers the uploading traffic of the AI-Wordsmith application.";
+        appident yes;
+        virus-ident yes;
+        file-type-ident yes;
+        vulnerability-ident yes;
+        evasive-behavior no;
+        consume-big-bandwidth no;
+        used-by-malware no;
+        able-to-transfer-file yes;
+        has-known-vulnerability yes;
+        tunnel-other-application no;
+        prone-to-misuse no;
+        pervasive-use no;
+        per-direction-regex no;
+        deny-action drop-reset;
+        data-ident yes;
+        cachable no;
+        file-forward yes;
+        can-disable yes;
+        new-appid yes;
+        is-saas yes;
+        saas {
+          is-data-breaches no;
+          is-ip-based-restrictions no;
+          is-poor-financial-viability no;
+          is-poor-terms-of-service no;
+        }
+        tag [ "[Generative AI]" [Uploading] "[Web App]"];
+        references {
+          HomePage {
+            link https://ai-wordsmith.com/;
+          }
+        }
+        use-applications ai-wordsmith-base;
+        tunnel-applications ctd-dummy;
+        risk 3;
+        parent-app ai-wordsmith-base;
+        preview yes;
+      }
+      azure-iot {
+        category networking;
+        subcategory infrastructure;
+        technology client-server;
+        description "Azure IoT Hub is a managed service hosted in the cloud that acts as a central message hub for communication between an IoT application and its attached devices. Users can connect millions of devices and their backend solutions reliably and securely. Almost any device can be connected to an IoT hub. This App-ID covers communication between an IoT device and a Azure IoT Hub.";
+        appident yes;
+        vulnerability-ident yes;
+        evasive-behavior no;
+        consume-big-bandwidth no;
+        used-by-malware no;
+        able-to-transfer-file no;
+        has-known-vulnerability yes;
+        tunnel-other-application no;
+        prone-to-misuse no;
+        pervasive-use no;
+        per-direction-regex no;
+        deny-action drop-reset;
+        cachable no;
+        can-disable yes;
+        new-appid yes;
+        references {
+          HomePage {
+            link https://learn.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide;
+          }
+        }
+        use-applications ssl;
+        risk 1;
+        preview yes;
+      }
+      boxnet-copy {
+        category general-internet;
+        subcategory file-sharing;
+        technology browser-based;
+        description "Box.net is an online storage, file hosting, and file sharing service that allows individuals to access and share files online. This App-ID covers the copying traffic of Boxnet.";
+        appident yes;
+        vulnerability-ident yes;
+        evasive-behavior no;
+        consume-big-bandwidth no;
+        used-by-malware no;
+        able-to-transfer-file no;
+        has-known-vulnerability yes;
+        tunnel-other-application no;
+        prone-to-misuse no;
+        pervasive-use yes;
+        per-direction-regex no;
+        deny-action drop-reset;
+        cachable no;
+        new-appid yes;
+        is-saas yes;
+        saas {
+          certifications {
+            is-fedramp yes;
+            is-finra yes;
+            is-hipaa yes;
+            is-pci yes;
+            is-soc1 yes;
+            is-soc2 yes;
+            is-truste yes;
+          }
+          is-data-breaches no;
+          is-ip-based-restrictions yes;
+          is-poor-financial-viability no;
+          is-poor-terms-of-service no;
+        }
+        tag "[Web App]";
+        references {
+          HomePage {
+            link http://www.box.net/;
+          }
+        }
+        use-applications boxnet-base;
+        tunnel-applications ctd-dummy;
+        risk 1;
+        parent-app boxnet-base;
+        preview yes;
+      }
+      boxnet-create {
+        category general-internet;
+        subcategory file-sharing;
+        technology browser-based;
+        description "Box.net is an online storage, file hosting, and file sharing service that allows individuals to access and share files online. This App-ID covers the creating traffic of Boxnet.";
+        appident yes;
+        vulnerability-ident yes;
+        evasive-behavior no;
+        consume-big-bandwidth no;
+        used-by-malware no;
+        able-to-transfer-file no;
+        has-known-vulnerability yes;
+        tunnel-other-application no;
+        prone-to-misuse no;
+        pervasive-use yes;
+        per-direction-regex no;
+        deny-action drop-reset;
+        cachable no;
+        new-appid yes;
+        is-saas yes;
+        saas {
+          certifications {
+            is-fedramp yes;
+            is-finra yes;
+            is-hipaa yes;
+            is-pci yes;
+            is-soc1 yes;
+            is-soc2 yes;
+            is-truste yes;
+          }
+          is-data-breaches no;
+          is-ip-based-restrictions yes;
+          is-poor-financial-viability no;
+          is-poor-terms-of-service no;
+        }
+        tag "[Web App]";
+        references {
+          HomePage {
+            link http://www.box.net/;
+          }
+        }
+        use-applications boxnet-base;
+        tunnel-applications ctd-dummy;
+        risk 1;
+        parent-app boxnet-base;
+        preview yes;
+      }
+      boxnet-delete {
+        category general-internet;
+        subcategory file-sharing;
+        technology browser-based;
+        description "Box.net is an online storage, file hosting, and file sharing service that allows individuals to access and share files online. This App-ID covers the deleting traffic of Boxnet.";
+        appident yes;
+        vulnerability-ident yes;
+        evasive-behavior no;
+        consume-big-bandwidth no;
+        used-by-malware no;
+        able-to-transfer-file no;
+        has-known-vulnerability yes;
+        tunnel-other-application no;
+        prone-to-misuse no;
+        pervasive-use yes;
+        per-direction-regex no;
+        deny-action drop-reset;
+        cachable no;
+        new-appid yes;
+        is-saas yes;
+        saas {
+          certifications {
+            is-fedramp yes;
+            is-finra yes;
+            is-hipaa yes;
+            is-pci yes;
+            is-soc1 yes;
+            is-soc2 yes;
+            is-truste yes;
+          }
+          is-data-breaches no;
+          is-ip-based-restrictions yes;
+          is-poor-financial-viability no;
+          is-poor-terms-of-service no;
+        }
+        tag [ [Deleting] "[Web App]"];
+        references {
+          HomePage {
+            link http://www.box.net/;
+          }
+        }
+        use-applications boxnet-base;
+        tunnel-applications ctd-dummy;
+        risk 1;
+        parent-app boxnet-base;
+        preview yes;
+      }
+      boxnet-move {
+        category general-internet;
+        subcategory file-sharing;
+        technology browser-based;
+        description "Box.net is an online storage, file hosting, and file sharing service that allows individuals to access and share files online. This App-ID covers the moving traffic of Boxnet.";
+        appident yes;
+        vulnerability-ident yes;
+        evasive-behavior no;
+        consume-big-bandwidth no;
+        used-by-malware no;
+        able-to-transfer-file no;
+        has-known-vulnerability yes;
+        tunnel-other-application no;
+        prone-to-misuse no;
+        pervasive-use yes;
+        per-direction-regex no;
+        deny-action drop-reset;
+        cachable no;
+        new-appid yes;
+        is-saas yes;
+        saas {
+          certifications {
+            is-fedramp yes;
+            is-finra yes;
+            is-hipaa yes;
+            is-pci yes;
+            is-soc1 yes;
+            is-soc2 yes;
+            is-truste yes;
+          }
+          is-data-breaches no;
+          is-ip-based-restrictions yes;
+          is-poor-financial-viability no;
+          is-poor-terms-of-service no;
+        }
+        tag "[Web App]";
+        references {
+          HomePage {
+            link http://www.box.net/;
+          }
+        }
+        use-applications boxnet-base;
+        tunnel-applications ctd-dummy;
+        risk 1;
+        parent-app boxnet-base;
+        preview yes;
+      }
+      boxnet-unshare {
+        category general-internet;
+        subcategory file-sharing;
+        technology browser-based;
+        description "Box.net is an online storage, file hosting, and file sharing service that allows individuals to access and share files online. This App-ID covers the unsharing traffic of Boxnet.";
+        appident yes;
+        vulnerability-ident yes;
+        evasive-behavior no;
+        consume-big-bandwidth no;
+        used-by-malware no;
+        able-to-transfer-file no;
+        has-known-vulnerability yes;
+        tunnel-other-application no;
+        prone-to-misuse no;
+        pervasive-use yes;
+        per-direction-regex no;
+        deny-action drop-reset;
+        cachable no;
+        new-appid yes;
+        is-saas yes;
+        saas {
+          certifications {
+            is-fedramp yes;
+            is-finra yes;
+            is-hipaa yes;
+            is-pci yes;
+            is-soc1 yes;
+            is-soc2 yes;
+            is-truste yes;
+          }
+          is-data-breaches no;
+          is-ip-based-restrictions yes;
+          is-poor-financial-viability no;
+          is-poor-terms-of-service no;
+        }
+        tag "[Web App]";
+        references {
+          HomePage {
+            link http://www.box.net/;
+          }
+        }
+        use-applications boxnet-base;
+        tunnel-applications ctd-dummy;
+        risk 1;
+        parent-app boxnet-base;
+        preview yes;
+      }
+      deepl-translator-delete {
+        category business-systems;
+        subcategory artificial-intelligence;
+        technology browser-based;
+        description "DeepL Translator is a machine translation service that produces translations of unprecedented quality. This App-ID covers the deleting traffic of DeepL Translator.";
+        appident yes;
+        vulnerability-ident yes;
+        evasive-behavior no;
+        consume-big-bandwidth no;
+        used-by-malware no;
+        able-to-transfer-file no;
+        has-known-vulnerability yes;
+        tunnel-other-application no;
+        prone-to-misuse no;
+        pervasive-use no;
+        per-direction-regex no;
+        deny-action drop-reset;
+        cachable no;
+        can-disable yes;
+        new-appid yes;
+        is-saas yes;
+        saas {
+          is-data-breaches no;
+          is-ip-based-restrictions no;
+          is-poor-financial-viability no;
+          is-poor-terms-of-service no;
+        }
+        tag [ [Deleting] "[Generative AI]" "[Web App]"];
+        references {
+          HomePage {
+            link https://www.deepl.com/en/translator;
+          }
+        }
+        use-applications deepl-translator;
+        tunnel-applications ctd-dummy;
+        risk 4;
+        parent-app deepl-translator;
+        preview yes;
+      }
+      deepl-translator-download {
+        category business-systems;
+        subcategory artificial-intelligence;
+        technology browser-based;
+        description "DeepL Translator is a machine translation service that produces translations of unprecedented quality. This App-ID covers the downloading traffic of DeepL Translator.";
+        appident yes;
+        virus-ident yes;
+        file-type-ident yes;
+        vulnerability-ident yes;
+        evasive-behavior no;
+        consume-big-bandwidth no;
+        used-by-malware no;
+        able-to-transfer-file yes;
+        has-known-vulnerability yes;
+        tunnel-other-application no;
+        prone-to-misuse no;
+        pervasive-use no;
+        per-direction-regex no;
+        deny-action drop-reset;
+        data-ident yes;
+        cachable no;
+        file-forward yes;
+        can-disable yes;
+        new-appid yes;
+        is-saas yes;
+        saas {
+          is-data-breaches no;
+          is-ip-based-restrictions no;
+          is-poor-financial-viability no;
+          is-poor-terms-of-service no;
+        }
+        tag [ [Downloading] "[Generative AI]" "[Web App]"];
+        references {
+          HomePage {
+            link https://www.deepl.com/en/translator;
+          }
+        }
+        use-applications deepl-translator;
+        tunnel-applications ctd-dummy;
+        risk 4;
+        parent-app deepl-translator;
+        preview yes;
+      }
+      deepl-translator-edit {
+        category business-systems;
+        subcategory artificial-intelligence;
+        technology browser-based;
+        description "DeepL Translator is a machine translation service that produces translations of unprecedented quality. This App-ID covers the editing traffic of DeepL Translator.";
+        appident yes;
+        vulnerability-ident yes;
+        evasive-behavior no;
+        consume-big-bandwidth no;
+        used-by-malware no;
+        able-to-transfer-file no;
+        has-known-vulnerability yes;
+        tunnel-other-application no;
+        prone-to-misuse no;
+        pervasive-use no;
+        per-direction-regex no;
+        deny-action drop-reset;
+        cachable no;
+        can-disable yes;
+        new-appid yes;
+        is-saas yes;
+        saas {
+          is-data-breaches no;
+          is-ip-based-restrictions no;
+          is-poor-financial-viability no;
+          is-poor-terms-of-service no;
+        }
+        tag [ [Editing] "[Generative AI]" "[Web App]"];
+        references {
+          HomePage {
+            link https://www.deepl.com/en/translator;
+          }
+        }
+        use-applications deepl-translator;
+        tunnel-applications ctd-dummy;
+        risk 4;
+        parent-app deepl-translator;
+        preview yes;
+      }
+      deepl-translator-upload {
+        category business-systems;
+        subcategory artificial-intelligence;
+        technology browser-based;
+        description "DeepL Translator is a machine translation service that produces translations of unprecedented quality. This App-ID covers the uploading traffic of DeepL Translator.";
+        appident yes;
+        virus-ident yes;
+        file-type-ident yes;
+        vulnerability-ident yes;
+        evasive-behavior no;
+        consume-big-bandwidth no;
+        used-by-malware no;
+        able-to-transfer-file yes;
+        has-known-vulnerability yes;
+        tunnel-other-application no;
+        prone-to-misuse no;
+        pervasive-use no;
+        per-direction-regex no;
+        deny-action drop-reset;
+        data-ident yes;
+        cachable no;
+        file-forward yes;
+        can-disable yes;
+        new-appid yes;
+        is-saas yes;
+        saas {
+          is-data-breaches no;
+          is-ip-based-restrictions no;
+          is-poor-financial-viability no;
+          is-poor-terms-of-service no;
+        }
+        tag [ "[Generative AI]" [Uploading] "[Web App]"];
+        references {
+          HomePage {
+            link https://www.deepl.com/en/translator;
+          }
+        }
+        use-applications deepl-translator;
+        tunnel-applications ctd-dummy;
+        risk 4;
+        parent-app deepl-translator;
+        preview yes;
+      }
+      filmora-copy {
+        category business-systems;
+        subcategory artificial-intelligence;
+        technology browser-based;
+        description "Filmora is a video editing application that allows users to create and edit videos for personal or professional use. This App-ID covers the copying traffic of the Filmora application.";
+        appident yes;
+        vulnerability-ident yes;
+        evasive-behavior no;
+        consume-big-bandwidth no;
+        used-by-malware no;
+        able-to-transfer-file no;
+        has-known-vulnerability yes;
+        tunnel-other-application no;
+        prone-to-misuse no;
+        pervasive-use no;
+        per-direction-regex no;
+        deny-action drop-reset;
+        cachable no;
+        can-disable yes;
+        new-appid yes;
+        is-saas yes;
+        saas {
+          is-data-breaches no;
+          is-ip-based-restrictions no;
+          is-poor-financial-viability no;
+          is-poor-terms-of-service no;
+        }
+        tag [ "[Generative AI]" "[Web App]"];
+        references {
+          HomePage {
+            link https://filmora.wondershare.com/;
+          }
+        }
+        use-applications filmora-base;
+        tunnel-applications ctd-dummy;
+        risk 3;
+        parent-app filmora-base;
+        preview yes;
+      }
+      filmora-base {
+        ottawa-name filmora;
+        category business-systems;
+        subcategory artificial-intelligence;
+        technology browser-based;
+        description "Filmora is a video editing application that allows users to create and edit videos for personal or professional use. This App-ID covers the traffic of the Filmora application.";
+        appident yes;
+        virus-ident yes;
+        file-type-ident yes;
+        vulnerability-ident yes;
+        evasive-behavior no;
+        consume-big-bandwidth no;
+        used-by-malware no;
+        able-to-transfer-file yes;
+        has-known-vulnerability yes;
+        tunnel-other-application no;
+        prone-to-misuse no;
+        pervasive-use no;
+        per-direction-regex no;
+        deny-action drop-reset;
+        data-ident yes;
+        cachable no;
+        file-forward yes;
+        can-disable yes;
+        new-appid yes;
+        is-saas yes;
+        saas {
+          is-data-breaches no;
+          is-ip-based-restrictions no;
+          is-poor-financial-viability no;
+          is-poor-terms-of-service no;
+        }
+        tag [ "[Generative AI]" "[Web App]"];
+        references {
+          HomePage {
+            link https://filmora.wondershare.com/;
+          }
+        }
+        use-applications [ google-base ssl web-browsing];
+        tunnel-applications [ filmora-copy filmora-create filmora-delete filmora-download filmora-edit filmora-move filmora-upload];
+        risk 3;
+        application-container filmora;
+        parent-app web20_parrent_app;
+        preview yes;
+      }
+      filmora {
+        ottawa-name filmora;
+        category business-systems;
+        subcategory artificial-intelligence;
+        technology browser-based;
+        description "Filmora is a video editing application that allows users to create and edit videos for personal or professional use. This App-ID covers the traffic of the Filmora application.";
+        appident yes;
+        virus-ident yes;
+        file-type-ident yes;
+        vulnerability-ident yes;
+        evasive-behavior no;
+        consume-big-bandwidth no;
+        used-by-malware no;
+        able-to-transfer-file yes;
+        has-known-vulnerability yes;
+        tunnel-other-application no;
+        prone-to-misuse no;
+        pervasive-use no;
+        per-direction-regex no;
+        deny-action drop-reset;
+        data-ident yes;
+        cachable no;
+        file-forward yes;
+        can-disable yes;
+        new-appid yes;
+        is-saas yes;
+        saas {
+          is-data-breaches no;
+          is-ip-based-restrictions no;
+          is-poor-financial-viability no;
+          is-poor-terms-of-service no;
+        }
+        tag [ "[Generative AI]" "[Web App]"];
+        references {
+          HomePage {
+            link https://filmora.wondershare.com/;
+          }
+        }
+        use-applications [ google-base ssl web-browsing];
+        tunnel-applications [ filmora-copy filmora-create filmora-delete filmora-download filmora-edit filmora-move filmora-upload];
+        risk 3;
+        application-container filmora;
+        parent-app web20_parrent_app;
+        preview yes;
+      }
+      filmora-create {
+        category business-systems;
+        subcategory artificial-intelligence;
+        technology browser-based;
+        description "Filmora is a video editing application that allows users to create and edit videos for personal or professional use. This App-ID covers the creating traffic of the Filmora application.";
+        appident yes;
+        vulnerability-ident yes;
+        evasive-behavior no;
+        consume-big-bandwidth no;
+        used-by-malware no;
+        able-to-transfer-file no;
+        has-known-vulnerability yes;
+        tunnel-other-application no;
+        prone-to-misuse no;
+        pervasive-use no;
+        per-direction-regex no;
+        deny-action drop-reset;
+        cachable no;
+        can-disable yes;
+        new-appid yes;
+        is-saas yes;
+        saas {
+          is-data-breaches no;
+          is-ip-based-restrictions no;
+          is-poor-financial-viability no;
+          is-poor-terms-of-service no;
+        }
+        tag [ "[Generative AI]" "[Web App]"];
+        references {
+          HomePage {
+            link https://filmora.wondershare.com/;
+          }
+        }
+        use-applications filmora-base;
+        tunnel-applications ctd-dummy;
+        risk 3;
+        parent-app filmora-base;
+        preview yes;
+      }
+      filmora-delete {
+        category business-systems;
+        subcategory artificial-intelligence;
+        technology browser-based;
+        description "Filmora is a video editing application that allows users to create and edit videos for personal or professional use. This App-ID covers the deleting traffic of the Filmora application.";
+        appident yes;
+        vulnerability-ident yes;
+        evasive-behavior no;
+        consume-big-bandwidth no;
+        used-by-malware no;
+        able-to-transfer-file no;
+        has-known-vulnerability yes;
+        tunnel-other-application no;
+        prone-to-misuse no;
+        pervasive-use no;
+        per-direction-regex no;
+        deny-action drop-reset;
+        cachable no;
+        can-disable yes;
+        new-appid yes;
+        is-saas yes;
+        saas {
+          is-data-breaches no;
+          is-ip-based-restrictions no;
+          is-poor-financial-viability no;
+          is-poor-terms-of-service no;
+        }
+        tag [ [Deleting] "[Generative AI]" "[Web App]"];
+        references {
+          HomePage {
+            link https://filmora.wondershare.com/;
+          }
+        }
+        use-applications filmora-base;
+        tunnel-applications ctd-dummy;
+        risk 3;
+        parent-app filmora-base;
+        preview yes;
+      }
+      filmora-download {
+        category business-systems;
+        subcategory artificial-intelligence;
+        technology browser-based;
+        description "Filmora is a video editing application that allows users to create and edit videos for personal or professional use. This App-ID covers the downloading traffic of the Filmora application.";
+        appident yes;
+        virus-ident yes;
+        file-type-ident yes;
+        vulnerability-ident yes;
+        evasive-behavior no;
+        consume-big-bandwidth no;
+        used-by-malware no;
+        able-to-transfer-file yes;
+        has-known-vulnerability yes;
+        tunnel-other-application no;
+        prone-to-misuse no;
+        pervasive-use no;
+        per-direction-regex no;
+        deny-action drop-reset;
+        data-ident yes;
+        cachable no;
+        file-forward yes;
+        can-disable yes;
+        new-appid yes;
+        is-saas yes;
+        saas {
+          is-data-breaches no;
+          is-ip-based-restrictions no;
+          is-poor-financial-viability no;
+          is-poor-terms-of-service no;
+        }
+        tag [ [Downloading] "[Generative AI]" "[Web App]"];
+        references {
+          HomePage {
+            link https://filmora.wondershare.com/;
+          }
+        }
+        use-applications filmora-base;
+        tunnel-applications ctd-dummy;
+        risk 3;
+        parent-app filmora-base;
+        preview yes;
+      }
+      filmora-edit {
+        category business-systems;
+        subcategory artificial-intelligence;
+        technology browser-based;
+        description "Filmora is a video editing application that allows users to create and edit videos for personal or professional use. This App-ID covers the editing traffic of the Filmora application.";
+        appident yes;
+        vulnerability-ident yes;
+        evasive-behavior no;
+        consume-big-bandwidth no;
+        used-by-malware no;
+        able-to-transfer-file no;
+        has-known-vulnerability yes;
+        tunnel-other-application no;
+        prone-to-misuse no;
+        pervasive-use no;
+        per-direction-regex no;
+        deny-action drop-reset;
+        cachable no;
+        can-disable yes;
+        new-appid yes;
+        is-saas yes;
+        saas {
+          is-data-breaches no;
+          is-ip-based-restrictions no;
+          is-poor-financial-viability no;
+          is-poor-terms-of-service no;
+        }
+        tag [ [Editing] "[Generative AI]" "[Web App]"];
+        references {
+          HomePage {
+            link https://filmora.wondershare.com/;
+          }
+        }
+        use-applications filmora-base;
+        tunnel-applications ctd-dummy;
+        risk 3;
+        parent-app filmora-base;
+        preview yes;
+      }
+      filmora-move {
+        category business-systems;
+        subcategory artificial-intelligence;
+        technology browser-based;
+        description "Filmora is a video editing application that allows users to create and edit videos for personal or professional use. This App-ID covers the moving traffic of the Filmora application.";
+        appident yes;
+        vulnerability-ident yes;
+        evasive-behavior no;
+        consume-big-bandwidth no;
+        used-by-malware no;
+        able-to-transfer-file no;
+        has-known-vulnerability yes;
+        tunnel-other-application no;
+        prone-to-misuse no;
+        pervasive-use no;
+        per-direction-regex no;
+        deny-action drop-reset;
+        cachable no;
+        can-disable yes;
+        new-appid yes;
+        is-saas yes;
+        saas {
+          is-data-breaches no;
+          is-ip-based-restrictions no;
+          is-poor-financial-viability no;
+          is-poor-terms-of-service no;
+        }
+        tag [ "[Generative AI]" "[Web App]"];
+        references {
+          HomePage {
+            link https://filmora.wondershare.com/;
+          }
+        }
+        use-applications filmora-base;
+        tunnel-applications ctd-dummy;
+        risk 3;
+        parent-app filmora-base;
+        preview yes;
+      }
+      filmora-upload {
+        category business-systems;
+        subcategory artificial-intelligence;
+        technology browser-based;
+        description "Filmora is a video editing application that allows users to create and edit videos for personal or professional use. This App-ID covers the uploading traffic of the Filmora application.";
+        appident yes;
+        virus-ident yes;
+        file-type-ident yes;
+        vulnerability-ident yes;
+        evasive-behavior no;
+        consume-big-bandwidth no;
+        used-by-malware no;
+        able-to-transfer-file yes;
+        has-known-vulnerability yes;
+        tunnel-other-application no;
+        prone-to-misuse no;
+        pervasive-use no;
+        per-direction-regex no;
+        deny-action drop-reset;
+        data-ident yes;
+        cachable no;
+        file-forward yes;
+        can-disable yes;
+        new-appid yes;
+        is-saas yes;
+        saas {
+          is-data-breaches no;
+          is-ip-based-restrictions no;
+          is-poor-financial-viability no;
+          is-poor-terms-of-service no;
+        }
+        tag [ "[Generative AI]" [Uploading] "[Web App]"];
+        references {
+          HomePage {
+            link https://filmora.wondershare.com/;
+          }
+        }
+        use-applications filmora-create;
+        tunnel-applications ctd-dummy;
+        risk 3;
+        parent-app filmora-base;
+        preview yes;
+      }
+      google-meet-join {
+        category collaboration;
+        subcategory internet-conferencing;
+        technology browser-based;
+        description "Google Meet is a video communication service developed by Google. This App-ID covers the joining traffic of Google Meet.";
+        appident yes;
+        spyware-ident yes;
+        vulnerability-ident yes;
+        evasive-behavior no;
+        consume-big-bandwidth yes;
+        used-by-malware no;
+        able-to-transfer-file no;
+        has-known-vulnerability yes;
+        tunnel-other-application no;
+        prone-to-misuse no;
+        pervasive-use no;
+        per-direction-regex no;
+        deny-action drop-reset;
+        cachable no;
+        can-disable yes;
+        new-appid yes;
+        is-saas yes;
+        saas {
+          certifications {
+            is-fedramp yes;
+            is-hipaa yes;
+            is-soc1 yes;
+            is-soc2 yes;
+          }
+          is-data-breaches no;
+          is-ip-based-restrictions no;
+          is-poor-financial-viability no;
+          is-poor-terms-of-service no;
+        }
+        tag [ "[Enterprise VoIP]" "[G Suite]" "[Web App]"];
+        references {
+          HomePage {
+            link https://meet.google.com/;
+          }
+          Wikipedia {
+            link https://en.wikipedia.org/wiki/Google_Meet;
+          }
+        }
+        use-applications google-meet-base;
+        tunnel-applications ctd-dummy;
+        risk 3;
+        parent-app google-meet-base;
+        preview yes;
+      }
+      google-meet-record {
+        category collaboration;
+        subcategory internet-conferencing;
+        technology browser-based;
+        description "Google Meet is a video communication service developed by Google. This App-ID covers the recording traffic of Google Meet.";
+        appident yes;
+        spyware-ident yes;
+        vulnerability-ident yes;
+        evasive-behavior no;
+        consume-big-bandwidth yes;
+        used-by-malware no;
+        able-to-transfer-file no;
+        has-known-vulnerability yes;
+        tunnel-other-application no;
+        prone-to-misuse no;
+        pervasive-use no;
+        per-direction-regex no;
+        deny-action drop-reset;
+        cachable no;
+        can-disable yes;
+        new-appid yes;
+        is-saas yes;
+        saas {
+          certifications {
+            is-fedramp yes;
+            is-hipaa yes;
+            is-soc1 yes;
+            is-soc2 yes;
+          }
+          is-data-breaches no;
+          is-ip-based-restrictions no;
+          is-poor-financial-viability no;
+          is-poor-terms-of-service no;
+        }
+        tag [ "[Enterprise VoIP]" "[G Suite]" "[Web App]"];
+        references {
+          HomePage {
+            link https://meet.google.com/;
+          }
+          Wikipedia {
+            link https://en.wikipedia.org/wiki/Google_Meet;
+          }
+        }
+        use-applications google-meet-join;
+        tunnel-applications ctd-dummy;
+        risk 3;
+        parent-app google-meet-base;
+        preview yes;
+      }
+      guldmann-clm-hoist {
+        category business-systems;
+        subcategory medical;
+        technology client-server;
+        description "Guldmann Care Lift Management (CLM) ceiling hoist is often the ideal and most effective way to lift and move people. The Guldmann lifting module is intended for lifting and transferring a user with disabilities and for gait training. This App-ID covers communication from a Guldmann CLM ceiling hoist to a CLM data server.";
+        alg yes;
+        appident yes;
+        evasive-behavior no;
+        consume-big-bandwidth no;
+        used-by-malware no;
+        able-to-transfer-file no;
+        has-known-vulnerability no;
+        tunnel-other-application no;
+        prone-to-misuse no;
+        pervasive-use no;
+        per-direction-regex no;
+        deny-action drop-reset;
+        cachable no;
+        new-appid yes;
+        references {
+          HomePage {
+            link https://www.guldmann.com/us/products/ceiling-lift-systems;
+          }
+        }
+        risk 1;
+        preview yes;
+      }
+      jasper-ai-create {
+        category business-systems;
+        subcategory artificial-intelligence;
+        technology browser-based;
+        description "Jasper is an AI writer and AI art generator for teams. It helps user to create blog posts, marketing copy, and AI-generated images. This App-ID covers the creating traffic of Jasper AI.";
+        appident yes;
+        vulnerability-ident yes;
+        evasive-behavior no;
+        consume-big-bandwidth no;
+        used-by-malware no;
+        able-to-transfer-file no;
+        has-known-vulnerability yes;
+        tunnel-other-application no;
+        prone-to-misuse no;
+        pervasive-use no;
+        per-direction-regex no;
+        deny-action drop-reset;
+        cachable no;
+        can-disable yes;
+        new-appid yes;
+        is-saas yes;
+        saas {
+          certifications {
+            is-soc2 yes;
+          }
+          is-data-breaches no;
+          is-ip-based-restrictions no;
+          is-poor-financial-viability no;
+          is-poor-terms-of-service no;
+        }
+        tag [ "[Generative AI]" "[Web App]"];
+        references {
+          HomePage {
+            link https://www.jasper.ai/;
+          }
+        }
+        use-applications jasper-ai-base;
+        tunnel-applications ctd-dummy;
+        risk 2;
+        parent-app jasper-ai-base;
+        preview yes;
+      }
+      jasper-ai-delete {
+        category business-systems;
+        subcategory artificial-intelligence;
+        technology browser-based;
+        description "Jasper is an AI writer and AI art generator for teams. It helps user to create blog posts, marketing copy, and AI-generated images. This App-ID covers the deleting traffic of Jasper AI.";
+        appident yes;
+        vulnerability-ident yes;
+        evasive-behavior no;
+        consume-big-bandwidth no;
+        used-by-malware no;
+        able-to-transfer-file no;
+        has-known-vulnerability yes;
+        tunnel-other-application no;
+        prone-to-misuse no;
+        pervasive-use no;
+        per-direction-regex no;
+        deny-action drop-reset;
+        cachable no;
+        can-disable yes;
+        new-appid yes;
+        is-saas yes;
+        saas {
+          certifications {
+            is-soc2 yes;
+          }
+          is-data-breaches no;
+          is-ip-based-restrictions no;
+          is-poor-financial-viability no;
+          is-poor-terms-of-service no;
+        }
+        tag [ [Deleting] "[Generative AI]" "[Web App]"];
+        references {
+          HomePage {
+            link https://www.jasper.ai/;
+          }
+        }
+        use-applications jasper-ai-base;
+        tunnel-applications ctd-dummy;
+        risk 2;
+        parent-app jasper-ai-base;
+        preview yes;
+      }
+      jasper-ai-download {
+        category business-systems;
+        subcategory artificial-intelligence;
+        technology browser-based;
+        description "Jasper is an AI writer and AI art generator for teams. It helps user to create blog posts, marketing copy, and AI-generated images. This App-ID covers the downloading traffic of Jasper AI.";
+        appident yes;
+        vulnerability-ident yes;
+        evasive-behavior no;
+        consume-big-bandwidth no;
+        used-by-malware no;
+        able-to-transfer-file yes;
+        has-known-vulnerability yes;
+        tunnel-other-application no;
+        prone-to-misuse no;
+        pervasive-use no;
+        per-direction-regex no;
+        deny-action drop-reset;
+        cachable no;
+        can-disable yes;
+        new-appid yes;
+        is-saas yes;
+        saas {
+          certifications {
+            is-soc2 yes;
+          }
+          is-data-breaches no;
+          is-ip-based-restrictions no;
+          is-poor-financial-viability no;
+          is-poor-terms-of-service no;
+        }
+        tag [ [Downloading] "[Generative AI]" "[Web App]"];
+        references {
+          HomePage {
+            link https://www.jasper.ai/;
+          }
+        }
+        use-applications jasper-ai-base;
+        tunnel-applications ctd-dummy;
+        risk 2;
+        parent-app jasper-ai-base;
+        preview yes;
+      }
+      moxa-configuration {
+        category business-systems;
+        subcategory ics-protocols;
+        technology client-server;
+        description "Moxa's Modbus TCP gateway solutions convert data in networks between Modbus RTU/ASCII, Modbus TCP, DNP3, CANopen, J1939, PROFIBUS, BACnet/IP, IEC 101/104, and IEC 61850, making configuration, troubleshooting, and conversion quick and easy. This App-ID covers the traffic of configuring Moxa gateways.";
+        appident yes;
+        evasive-behavior no;
+        consume-big-bandwidth no;
+        used-by-malware no;
+        able-to-transfer-file no;
+        has-known-vulnerability no;
+        tunnel-other-application no;
+        prone-to-misuse no;
+        pervasive-use no;
+        per-direction-regex no;
+        deny-action drop-reset;
+        cachable no;
+        new-appid yes;
+        references {
+          HomePage {
+            link https://www.moxa.com/en/products/industrial-edge-connectivity/protocol-gateways/modbus-tcp-gateways;
+          }
+        }
+        risk 1;
+        preview yes;
+      }
+      moxa-discovery {
+        category business-systems;
+        subcategory ics-protocols;
+        technology client-server;
+        description "Moxa's Modbus TCP gateway solutions convert data in networks between Modbus RTU/ASCII, Modbus TCP, DNP3, CANopen, J1939, PROFIBUS, BACnet/IP, IEC 101/104, and IEC 61850, making configuration, troubleshooting, and conversion quick and easy. This App-ID covers the discovery of Moxa gateways through MGate Manager and Moxa's Device Search Utility (DSU).";
+        appident yes;
+        evasive-behavior no;
+        consume-big-bandwidth no;
+        used-by-malware no;
+        able-to-transfer-file no;
+        has-known-vulnerability no;
+        tunnel-other-application no;
+        prone-to-misuse no;
+        pervasive-use no;
+        per-direction-regex no;
+        deny-action drop-reset;
+        cachable no;
+        can-disable yes;
+        new-appid yes;
+        references {
+          HomePage {
+            link https://www.moxa.com/en/products/industrial-edge-connectivity/protocol-gateways/modbus-tcp-gateways;
+          }
+        }
+        risk 1;
+        preview yes;
+      }
+      ms-office365-copilot-delete {
+        category business-systems;
+        subcategory artificial-intelligence;
+        technology browser-based;
+        description "Microsoft Copilot for Microsoft 365 is an AI-powered productivity tool that coordinates large language models (LLMs), content in Microsoft 365 apps that are used every day, such as Word, Excel, PowerPoint, Outlook, and Teams. This App-ID covers the deleting traffic of Microsoft 365 Copilot.";
+        appident yes;
+        vulnerability-ident yes;
+        evasive-behavior no;
+        consume-big-bandwidth no;
+        used-by-malware no;
+        able-to-transfer-file no;
+        has-known-vulnerability yes;
+        tunnel-other-application no;
+        prone-to-misuse no;
+        pervasive-use yes;
+        per-direction-regex no;
+        deny-action drop-reset;
+        cachable no;
+        can-disable yes;
+        new-appid yes;
+        is-saas yes;
+        saas {
+          certifications {
+            is-fedramp yes;
+            is-finra yes;
+            is-hipaa yes;
+            is-pci yes;
+            is-soc1 yes;
+            is-soc2 yes;
+          }
+          is-data-breaches no;
+          is-ip-based-restrictions yes;
+          is-poor-financial-viability no;
+          is-poor-terms-of-service no;
+        }
+        tag [ [Deleting] "[Generative AI]" "[Office 365]" "[Web App]"];
+        references {
+          HomePage {
+            link https://www.microsoft.com/en-us/microsoft-365/business/copilot-for-microsoft-365;
+          }
+        }
+        use-applications ms-office365-copilot;
+        tunnel-applications ctd-dummy;
+        risk 2;
+        parent-app ms-office365-copilot;
+        preview yes;
+      }
+      ms-office365-copilot-edit {
+        category business-systems;
+        subcategory artificial-intelligence;
+        technology browser-based;
+        description "Microsoft Copilot for Microsoft 365 is an AI-powered productivity tool that coordinates large language models (LLMs), content in Microsoft 365 apps that are used every day, such as Word, Excel, PowerPoint, Outlook, and Teams. This App-ID covers the editing traffic of Microsoft 365 Copilot.";
+        appident yes;
+        vulnerability-ident yes;
+        evasive-behavior no;
+        consume-big-bandwidth no;
+        used-by-malware no;
+        able-to-transfer-file no;
+        has-known-vulnerability yes;
+        tunnel-other-application no;
+        prone-to-misuse no;
+        pervasive-use yes;
+        per-direction-regex no;
+        deny-action drop-reset;
+        cachable no;
+        can-disable yes;
+        new-appid yes;
+        is-saas yes;
+        saas {
+          certifications {
+            is-fedramp yes;
+            is-finra yes;
+            is-hipaa yes;
+            is-pci yes;
+            is-soc1 yes;
+            is-soc2 yes;
+          }
+          is-data-breaches no;
+          is-ip-based-restrictions yes;
+          is-poor-financial-viability no;
+          is-poor-terms-of-service no;
+        }
+        tag [ [Editing] "[Generative AI]" "[Office 365]" "[Web App]"];
+        references {
+          HomePage {
+            link https://www.microsoft.com/en-us/microsoft-365/business/copilot-for-microsoft-365;
+          }
+        }
+        use-applications ms-office365-copilot;
+        tunnel-applications ctd-dummy;
+        risk 2;
+        parent-app ms-office365-copilot;
+        preview yes;
+      }
+      ms-office365-copilot-upload {
+        category business-systems;
+        subcategory artificial-intelligence;
+        technology browser-based;
+        description "Microsoft Copilot for Microsoft 365 is an AI-powered productivity tool that coordinates large language models (LLMs), content in Microsoft 365 apps that are used every day, such as Word, Excel, PowerPoint, Outlook, and Teams. This App-ID covers the uploading traffic of Microsoft 365 Copilot.";
+        appident yes;
+        virus-ident yes;
+        file-type-ident yes;
+        vulnerability-ident yes;
+        evasive-behavior no;
+        consume-big-bandwidth no;
+        used-by-malware no;
+        able-to-transfer-file yes;
+        has-known-vulnerability yes;
+        tunnel-other-application no;
+        prone-to-misuse no;
+        pervasive-use yes;
+        per-direction-regex no;
+        deny-action drop-reset;
+        data-ident yes;
+        cachable no;
+        file-forward yes;
+        can-disable yes;
+        new-appid yes;
+        is-saas yes;
+        saas {
+          certifications {
+            is-fedramp yes;
+            is-finra yes;
+            is-hipaa yes;
+            is-pci yes;
+            is-soc1 yes;
+            is-soc2 yes;
+          }
+          is-data-breaches no;
+          is-ip-based-restrictions yes;
+          is-poor-financial-viability no;
+          is-poor-terms-of-service no;
+        }
+        tag [ "[Generative AI]" "[Office 365]" [Uploading] "[Web App]"];
+        references {
+          HomePage {
+            link https://www.microsoft.com/en-us/microsoft-365/business/copilot-for-microsoft-365;
+          }
+        }
+        use-applications [ bing-ai-uploading ms-office365-copilot];
+        tunnel-applications ctd-dummy;
+        risk 2;
+        parent-app ms-office365-copilot;
+        preview yes;
+      }
+      otter.ai-delete {
+        category business-systems;
+        subcategory artificial-intelligence;
+        technology browser-based;
+        description "Otter can make teams more collaborative automatically joining meetings and producing live transcriptions that can be annotated, highlighted, and shared. This App-ID covers the deleting traffic of otter.ai application.";
+        icon data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAEw0lEQVR4nO2bb2hVZRzHP+fe3bNRm94gcyp37YUQyxGiVNOcUShJOCmCYCwD9Y32BymiFUQvglpFOZxSvhmSwzKtFyHFJsYg1xrltrRplEJu0rAone2au+fsnKcXv3O9u3c7tHOv6wl3PnDhnuc8z3O+z/f5Pec5z/lj4KGUagC2A3cBxdyYpIABYKdhGG0AhlLKAF4HGoGIRnH/JS7wJvCKoZR6AmjTLEgXDYZSqh9YqluJJvoNpVQKMHUr0YRtKKWUbhU6mS0nPV9CA3QL0E1ogG4BugkN0C1AN6EBugXoJjRAtwDdhAboFqCb0ADdAnQTGqBbgG6umwGWAxevys92pldm5KqUm276TFBUaAXdQ7CvD74ZggtXJG1hKdQkYOMyWFkxuUxqHF4+Ah9/D+Vl0LIB7rvdP30myfue4GgKGtuh9TuwUkAUMLydCnDBNGHz3fD2Oiib8KjlwxPQ0AbEABuWVkLv03DwB6jfl53esxWKC+4mf/IaAqMpePwjeL8LLBe5p5w2wPD+x2Tfni7J+1cqU/6nP7x8Eck3NCK9f2aK9FHr3/UUMmTyMuDFdmg/hTTcQJ6zjINZJD/GvTRD8rQPQGPHhIMa2fWltw2fdD/GxmH757CkGVa8B8fOBW9LYAN6zkvYE/MSHEjEYdejcPwpCeWWR6AiLvsAMKH1WylbCLk9/ckAtHTC8Cj0DcKzh8WUIAQeXXt7wbYQA1xYFIf2TXDnbZk81fNhzWJY2wq/XgYiYKekbE0i2PEMQ2aVlzrgQD8smCsnx5UVcOZPsobM+cuQtKAkQKsCRYDleL2YLuXA87XZjU9TNQ9eqCUTBVGZKdKNmi4lUfjsR9jRCcNJ6D0HzxwGV0E04JCZikAGJC24MIq4riBiwupK//yrKyFqSl4M+C0pJ7sgB40YcPr3CWpjMHjJqyePBk+qv6DSChzXf7ej4P/+4C2QAaUmzC/lWo+6Nnzxs3/+I2clTzpiystkTncDmOKqCUPMBWyovEXGeZB6/AhkgBmFFRVkxnUR7OqGrsHJeb8ehOZjyDUBgAs13lVhEN1jDmyogucegIVlsLwSdtfJecTJqSgfQwLPApuWw97jYHvz/KW/oe4D2FYDaxeLsC/Pwu4eGLmCGKAgZsLmZcEFKiXG73gYXn0QborJNsAdt3qZvOuQRXMlSoMQ2ICaBGy5B/Z8hbxJFIGRMWg6Ck2dXibHqznd+zZsWQX3BpwCc4mXZG8/tgR67odPT8KCOdC8PtgUCHkuht56CH65CB2nkOsBg8yFEWQGlgIsWFct64E0uaGa3vZL96O4CFrWw2trsiMjCHnNAnOK4VA9bF0FZgSwkV53vZ8DWLJvWy0crM9eDFXN8/54oZuIS2NyQzoRh7JphHS8JL/GQwGrwTTdQ9DWJxdIw0lJK79ZTpZP+iyHLUfWE4dOSOjurPOWw46sMHPTZ5Lr9oqM7WRWbqXm9HpkZGzq0PVLnwnCd4R0C9BNaIBuAboJDdAtQDehAboF6CY0QLcA3YQG6Bagm9AA3QJ0ExqgW4BuQgN0C9BN+pbmbMWKIN/SzlZOR4B3dKvQyLsR4ADwBnI3frbgAk3A/mtP2JVSG5HP56u5sT+fP4l8Pr8f4B/H5YDXL6w5kwAAAABJRU5ErkJggg==;
+        appident yes;
+        vulnerability-ident yes;
+        evasive-behavior no;
+        consume-big-bandwidth no;
+        used-by-malware no;
+        able-to-transfer-file no;
+        has-known-vulnerability yes;
+        tunnel-other-application no;
+        prone-to-misuse no;
+        pervasive-use no;
+        per-direction-regex no;
+        deny-action drop-reset;
+        cachable no;
+        new-appid yes;
+        is-saas yes;
+        saas {
+          certifications {
+            is-soc2 yes;
+          }
+          is-data-breaches no;
+          is-ip-based-restrictions no;
+          is-poor-financial-viability no;
+          is-poor-terms-of-service no;
+        }
+        tag [ [Deleting] "[Generative AI]" "[Web App]"];
+        references {
+          HomePage {
+            link https://otter.ai/;
+          }
+        }
+        use-applications otter.ai-base;
+        tunnel-applications ctd-dummy;
+        risk 2;
+        parent-app otter.ai-base;
+        preview yes;
+      }
+      otter.ai-download {
+        category business-systems;
+        subcategory artificial-intelligence;
+        technology browser-based;
+        description "Otter can make teams more collaborative automatically joining meetings and producing live transcriptions that can be annotated, highlighted, and shared. This App-ID covers the downloading traffic of otter.ai application.";
+        icon data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAEw0lEQVR4nO2bb2hVZRzHP+fe3bNRm94gcyp37YUQyxGiVNOcUShJOCmCYCwD9Y32BymiFUQvglpFOZxSvhmSwzKtFyHFJsYg1xrltrRplEJu0rAone2au+fsnKcXv3O9u3c7tHOv6wl3PnDhnuc8z3O+z/f5Pec5z/lj4KGUagC2A3cBxdyYpIABYKdhGG0AhlLKAF4HGoGIRnH/JS7wJvCKoZR6AmjTLEgXDYZSqh9YqluJJvoNpVQKMHUr0YRtKKWUbhU6mS0nPV9CA3QL0E1ogG4BugkN0C1AN6EBugXoJjRAtwDdhAboFqCb0ADdAnQTGqBbgG6umwGWAxevys92pldm5KqUm276TFBUaAXdQ7CvD74ZggtXJG1hKdQkYOMyWFkxuUxqHF4+Ah9/D+Vl0LIB7rvdP30myfue4GgKGtuh9TuwUkAUMLydCnDBNGHz3fD2Oiib8KjlwxPQ0AbEABuWVkLv03DwB6jfl53esxWKC+4mf/IaAqMpePwjeL8LLBe5p5w2wPD+x2Tfni7J+1cqU/6nP7x8Eck3NCK9f2aK9FHr3/UUMmTyMuDFdmg/hTTcQJ6zjINZJD/GvTRD8rQPQGPHhIMa2fWltw2fdD/GxmH757CkGVa8B8fOBW9LYAN6zkvYE/MSHEjEYdejcPwpCeWWR6AiLvsAMKH1WylbCLk9/ckAtHTC8Cj0DcKzh8WUIAQeXXt7wbYQA1xYFIf2TXDnbZk81fNhzWJY2wq/XgYiYKekbE0i2PEMQ2aVlzrgQD8smCsnx5UVcOZPsobM+cuQtKAkQKsCRYDleL2YLuXA87XZjU9TNQ9eqCUTBVGZKdKNmi4lUfjsR9jRCcNJ6D0HzxwGV0E04JCZikAGJC24MIq4riBiwupK//yrKyFqSl4M+C0pJ7sgB40YcPr3CWpjMHjJqyePBk+qv6DSChzXf7ej4P/+4C2QAaUmzC/lWo+6Nnzxs3/+I2clTzpiystkTncDmOKqCUPMBWyovEXGeZB6/AhkgBmFFRVkxnUR7OqGrsHJeb8ehOZjyDUBgAs13lVhEN1jDmyogucegIVlsLwSdtfJecTJqSgfQwLPApuWw97jYHvz/KW/oe4D2FYDaxeLsC/Pwu4eGLmCGKAgZsLmZcEFKiXG73gYXn0QborJNsAdt3qZvOuQRXMlSoMQ2ICaBGy5B/Z8hbxJFIGRMWg6Ck2dXibHqznd+zZsWQX3BpwCc4mXZG8/tgR67odPT8KCOdC8PtgUCHkuht56CH65CB2nkOsBg8yFEWQGlgIsWFct64E0uaGa3vZL96O4CFrWw2trsiMjCHnNAnOK4VA9bF0FZgSwkV53vZ8DWLJvWy0crM9eDFXN8/54oZuIS2NyQzoRh7JphHS8JL/GQwGrwTTdQ9DWJxdIw0lJK79ZTpZP+iyHLUfWE4dOSOjurPOWw46sMHPTZ5Lr9oqM7WRWbqXm9HpkZGzq0PVLnwnCd4R0C9BNaIBuAboJDdAtQDehAboF6CY0QLcA3YQG6Bagm9AA3QJ0ExqgW4BuQgN0C9BN+pbmbMWKIN/SzlZOR4B3dKvQyLsR4ADwBnI3frbgAk3A/mtP2JVSG5HP56u5sT+fP4l8Pr8f4B/H5YDXL6w5kwAAAABJRU5ErkJggg==;
+        appident yes;
+        virus-ident yes;
+        file-type-ident yes;
+        vulnerability-ident yes;
+        evasive-behavior no;
+        consume-big-bandwidth no;
+        used-by-malware no;
+        able-to-transfer-file yes;
+        has-known-vulnerability yes;
+        tunnel-other-application no;
+        prone-to-misuse no;
+        pervasive-use no;
+        per-direction-regex no;
+        deny-action drop-reset;
+        data-ident yes;
+        cachable no;
+        file-forward yes;
+        new-appid yes;
+        is-saas yes;
+        saas {
+          certifications {
+            is-soc2 yes;
+          }
+          is-data-breaches no;
+          is-ip-based-restrictions no;
+          is-poor-financial-viability no;
+          is-poor-terms-of-service no;
+        }
+        tag [ [Downloading] "[Generative AI]" "[Web App]"];
+        references {
+          HomePage {
+            link https://otter.ai/;
+          }
+        }
+        use-applications otter.ai-base;
+        tunnel-applications ctd-dummy;
+        risk 2;
+        parent-app otter.ai-base;
+        preview yes;
+      }
+      otter.ai-logout {
+        category business-systems;
+        subcategory artificial-intelligence;
+        technology browser-based;
+        description "Otter can make teams more collaborative automatically joining meetings and producing live transcriptions that can be annotated, highlighted, and shared. This App-ID covers the logout traffic of otter.ai application.";
+        icon data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAEw0lEQVR4nO2bb2hVZRzHP+fe3bNRm94gcyp37YUQyxGiVNOcUShJOCmCYCwD9Y32BymiFUQvglpFOZxSvhmSwzKtFyHFJsYg1xrltrRplEJu0rAone2au+fsnKcXv3O9u3c7tHOv6wl3PnDhnuc8z3O+z/f5Pec5z/lj4KGUagC2A3cBxdyYpIABYKdhGG0AhlLKAF4HGoGIRnH/JS7wJvCKoZR6AmjTLEgXDYZSqh9YqluJJvoNpVQKMHUr0YRtKKWUbhU6mS0nPV9CA3QL0E1ogG4BugkN0C1AN6EBugXoJjRAtwDdhAboFqCb0ADdAnQTGqBbgG6umwGWAxevys92pldm5KqUm276TFBUaAXdQ7CvD74ZggtXJG1hKdQkYOMyWFkxuUxqHF4+Ah9/D+Vl0LIB7rvdP30myfue4GgKGtuh9TuwUkAUMLydCnDBNGHz3fD2Oiib8KjlwxPQ0AbEABuWVkLv03DwB6jfl53esxWKC+4mf/IaAqMpePwjeL8LLBe5p5w2wPD+x2Tfni7J+1cqU/6nP7x8Eck3NCK9f2aK9FHr3/UUMmTyMuDFdmg/hTTcQJ6zjINZJD/GvTRD8rQPQGPHhIMa2fWltw2fdD/GxmH757CkGVa8B8fOBW9LYAN6zkvYE/MSHEjEYdejcPwpCeWWR6AiLvsAMKH1WylbCLk9/ckAtHTC8Cj0DcKzh8WUIAQeXXt7wbYQA1xYFIf2TXDnbZk81fNhzWJY2wq/XgYiYKekbE0i2PEMQ2aVlzrgQD8smCsnx5UVcOZPsobM+cuQtKAkQKsCRYDleL2YLuXA87XZjU9TNQ9eqCUTBVGZKdKNmi4lUfjsR9jRCcNJ6D0HzxwGV0E04JCZikAGJC24MIq4riBiwupK//yrKyFqSl4M+C0pJ7sgB40YcPr3CWpjMHjJqyePBk+qv6DSChzXf7ej4P/+4C2QAaUmzC/lWo+6Nnzxs3/+I2clTzpiystkTncDmOKqCUPMBWyovEXGeZB6/AhkgBmFFRVkxnUR7OqGrsHJeb8ehOZjyDUBgAs13lVhEN1jDmyogucegIVlsLwSdtfJecTJqSgfQwLPApuWw97jYHvz/KW/oe4D2FYDaxeLsC/Pwu4eGLmCGKAgZsLmZcEFKiXG73gYXn0QborJNsAdt3qZvOuQRXMlSoMQ2ICaBGy5B/Z8hbxJFIGRMWg6Ck2dXibHqznd+zZsWQX3BpwCc4mXZG8/tgR67odPT8KCOdC8PtgUCHkuht56CH65CB2nkOsBg8yFEWQGlgIsWFct64E0uaGa3vZL96O4CFrWw2trsiMjCHnNAnOK4VA9bF0FZgSwkV53vZ8DWLJvWy0crM9eDFXN8/54oZuIS2NyQzoRh7JphHS8JL/GQwGrwTTdQ9DWJxdIw0lJK79ZTpZP+iyHLUfWE4dOSOjurPOWw46sMHPTZ5Lr9oqM7WRWbqXm9HpkZGzq0PVLnwnCd4R0C9BNaIBuAboJDdAtQDehAboF6CY0QLcA3YQG6Bagm9AA3QJ0ExqgW4BuQgN0C9BN+pbmbMWKIN/SzlZOR4B3dKvQyLsR4ADwBnI3frbgAk3A/mtP2JVSG5HP56u5sT+fP4l8Pr8f4B/H5YDXL6w5kwAAAABJRU5ErkJggg==;
+        appident yes;
+        vulnerability-ident yes;
+        evasive-behavior no;
+        consume-big-bandwidth no;
+        used-by-malware no;
+        able-to-transfer-file no;
+        has-known-vulnerability yes;
+        tunnel-other-application no;
+        prone-to-misuse no;
+        pervasive-use no;
+        per-direction-regex no;
+        deny-action drop-reset;
+        cachable no;
+        new-appid yes;
+        is-saas yes;
+        saas {
+          certifications {
+            is-soc2 yes;
+          }
+          is-data-breaches no;
+          is-ip-based-restrictions no;
+          is-poor-financial-viability no;
+          is-poor-terms-of-service no;
+        }
+        tag [ "[Generative AI]" "[Web App]"];
+        references {
+          HomePage {
+            link https://otter.ai/;
+          }
+        }
+        use-applications otter.ai-base;
+        tunnel-applications ctd-dummy;
+        risk 2;
+        parent-app otter.ai-base;
+        preview yes;
+      }
+      otter.ai-share {
+        category business-systems;
+        subcategory artificial-intelligence;
+        technology browser-based;
+        description "Otter can make teams more collaborative automatically joining meetings and producing live transcriptions that can be annotated, highlighted, and shared. This App-ID covers the sharing traffic of otter.ai application.";
+        appident yes;
+        vulnerability-ident yes;
+        evasive-behavior no;
+        consume-big-bandwidth no;
+        used-by-malware no;
+        able-to-transfer-file no;
+        has-known-vulnerability yes;
+        tunnel-other-application no;
+        prone-to-misuse no;
+        pervasive-use no;
+        per-direction-regex no;
+        deny-action drop-reset;
+        cachable no;
+        new-appid yes;
+        is-saas yes;
+        saas {
+          certifications {
+            is-soc2 yes;
+          }
+          is-data-breaches no;
+          is-ip-based-restrictions no;
+          is-poor-financial-viability no;
+          is-poor-terms-of-service no;
+        }
+        tag [ "[Generative AI]" [Sharing] "[Web App]"];
+        references {
+          HomePage {
+            link https://otter.ai/;
+          }
+        }
+        use-applications otter.ai-base;
+        tunnel-applications ctd-dummy;
+        risk 2;
+        parent-app otter.ai-base;
+        preview yes;
+      }
+      otter.ai-upload {
+        category business-systems;
+        subcategory artificial-intelligence;
+        technology browser-based;
+        description "Otter can make teams more collaborative automatically joining meetings and producing live transcriptions that can be annotated, highlighted, and shared. This App-ID covers the uploading traffic of otter.ai application.";
+        appident yes;
+        virus-ident yes;
+        file-type-ident yes;
+        vulnerability-ident yes;
+        evasive-behavior no;
+        consume-big-bandwidth no;
+        used-by-malware no;
+        able-to-transfer-file yes;
+        has-known-vulnerability yes;
+        tunnel-other-application no;
+        prone-to-misuse no;
+        pervasive-use no;
+        per-direction-regex no;
+        deny-action drop-reset;
+        data-ident yes;
+        cachable no;
+        file-forward yes;
+        new-appid yes;
+        is-saas yes;
+        saas {
+          certifications {
+            is-soc2 yes;
+          }
+          is-data-breaches no;
+          is-ip-based-restrictions no;
+          is-poor-financial-viability no;
+          is-poor-terms-of-service no;
+        }
+        tag [ "[Generative AI]" [Uploading] "[Web App]"];
+        references {
+          HomePage {
+            link https://otter.ai/;
+          }
+        }
+        use-applications otter.ai-base;
+        tunnel-applications ctd-dummy;
+        risk 2;
+        parent-app otter.ai-base;
+        preview yes;
+      }
+      slidesai {
+        category business-systems;
+        subcategory artificial-intelligence;
+        technology browser-based;
+        description "SlidesAI is a Google Chrome extension for Google Slides. It is an AI-Powered Text To Presentation Tool that summarizes and creates presentation slides from text input. This App-ID covers the traffic of SlidesAI.";
+        appident yes;
+        vulnerability-ident yes;
+        evasive-behavior no;
+        consume-big-bandwidth no;
+        used-by-malware no;
+        able-to-transfer-file no;
+        has-known-vulnerability yes;
+        tunnel-other-application no;
+        prone-to-misuse no;
+        pervasive-use no;
+        per-direction-regex no;
+        deny-action drop-reset;
+        cachable no;
+        can-disable yes;
+        new-appid yes;
+        is-saas yes;
+        saas {
+          is-data-breaches no;
+          is-ip-based-restrictions no;
+          is-poor-financial-viability no;
+          is-poor-terms-of-service no;
+        }
+        tag [ "[Generative AI]" "[Web App]"];
+        references {
+          HomePage {
+            link https://www.slidesai.io/;
+          }
+        }
+        use-applications [ google-docs-base google-docs-enterprise google-slides-base ssl web-browsing];
+        risk 2;
+        parent-app google-docs-enterprise;
+        preview yes;
+      }
+      yandex-speechkit {
+        category business-systems;
+        subcategory artificial-intelligence;
+        technology browser-based;
+        description "Yandex SpeechKit is a speech recognition and synthesis technology that allows app developers to use speech-related tasks in their applications. This App-ID covers the traffic of Yandex Speechkit.";
+        appident yes;
+        vulnerability-ident yes;
+        evasive-behavior no;
+        consume-big-bandwidth no;
+        used-by-malware no;
+        able-to-transfer-file no;
+        has-known-vulnerability yes;
+        tunnel-other-application no;
+        prone-to-misuse no;
+        pervasive-use no;
+        per-direction-regex no;
+        deny-action drop-reset;
+        cachable no;
+        can-disable yes;
+        new-appid yes;
+        is-saas yes;
+        saas {
+          is-data-breaches no;
+          is-ip-based-restrictions no;
+          is-poor-financial-viability no;
+          is-poor-terms-of-service no;
+        }
+        tag [ "[Generative AI]" "[Web App]"];
+        references {
+          HomePage {
+            link https://yandex.cloud/en/services/speechkit;
+          }
+        }
+        use-applications [ ssl web-browsing];
+        risk 3;
+        parent-app web20_parrent_app;
+        preview yes;
+      }
+      yarn-chat-text-stories {
+        category media;
+        subcategory photo-video;
+        technology client-server;
+        description "Yarn - Chat & Text Stories is a chat fiction app to make reading fun, fast, and fabulous. This App-ID covers the traffic of the Yarn - Chat & Text Stories application.";
+        appident yes;
+        vulnerability-ident yes;
+        evasive-behavior no;
+        consume-big-bandwidth no;
+        used-by-malware no;
+        able-to-transfer-file no;
+        has-known-vulnerability yes;
+        tunnel-other-application no;
+        prone-to-misuse no;
+        pervasive-use no;
+        per-direction-regex no;
+        deny-action drop-reset;
+        cachable no;
+        can-disable yes;
+        new-appid yes;
+        is-saas yes;
+        saas {
+          is-data-breaches no;
+          is-ip-based-restrictions no;
+          is-poor-financial-viability no;
+          is-poor-terms-of-service no;
+        }
+        tag "[Web App]";
+        references {
+          HomePage {
+            link https://mammoth.la/;
+          }
+        }
+        use-applications [ ssl web-browsing];
+        risk 4;
+        parent-app web20_parrent_app;
+        preview yes;
+      }
+      zoll-server {
+        category business-systems;
+        subcategory medical;
+        technology client-server;
+        description "Zoll Server asset management software helps you stay on top of defibrillator maintenance across multiple devices and campuses. It centralizes information from all connected devices in one secure location, saving time and helping your team ensure defibrillators are ready the moment they are needed. Its cloud-based format allows you to access it from anywhere, anytime, securely. This App-ID covers communication from a Zoll defibrillator to a Zoll dashboard on a Zoll server.";
+        appident yes;
+        vulnerability-ident yes;
+        evasive-behavior no;
+        consume-big-bandwidth no;
+        used-by-malware no;
+        able-to-transfer-file no;
+        has-known-vulnerability yes;
+        tunnel-other-application no;
+        prone-to-misuse no;
+        pervasive-use no;
+        per-direction-regex no;
+        deny-action drop-reset;
+        cachable no;
+        can-disable yes;
+        new-appid yes;
+        is-saas yes;
+        saas {
+          certifications {
+            is-hipaa yes;
+          }
+          is-data-breaches no;
+          is-ip-based-restrictions no;
+          is-poor-financial-viability no;
+          is-poor-terms-of-service no;
+        }
+        tag "[Web App]";
+        references {
+          HomePage {
+            link https://www.zoll.com/products/data/hospital;
+          }
+        }
+        use-applications ssl;
+        risk 3;
+        preview yes;
+      }
+    }
+    application-type {
+      category;
+      technology;
+    }
+  }
+}
+zone {
+  outside {
+    network {
+      layer3 ethernet1/1;
+    }
+  }
+  inside {
+    network {
+      layer3 ethernet1/2;
+    }
+    enable-user-identification yes;
+  }
+}
+service-group;
+service;
+schedule;
+rulebase {
+  default-security-rules {
+    rules {
+      intrazone-default {
+        action allow;
+        log-start yes;
+        log-end no;
+      }
+      interzone-default {
+        action allow;
+        log-start yes;
+        log-end no;
+      }
+    }
+  }
+  nat {
+    rules {
+      "default DIPP" {
+        source-translation {
+          dynamic-ip-and-port {
+            interface-address {
+              ip 100.64.1.2/29;
+              interface ethernet1/1;
+            }
+          }
+        }
+        to outside;
+        from inside;
+        source any;
+        destination any;
+        service any;
+        to-interface ethernet1/1;
+      }
+    }
+  }
+  security {
+    rules {
+      "default allow" {
+        to any;
+        from any;
+        source any;
+        destination any;
+        source-user any;
+        category any;
+        application any;
+        service any;
+        source-hip any;
+        destination-hip any;
+        action allow;
+        log-start no;
+        log-end yes;
+      }
+      "default deny" {
+        to any;
+        from any;
+        source any;
+        destination any;
+        source-user any;
+        category any;
+        application any;
+        service any;
+        source-hip any;
+        destination-hip any;
+        action deny;
+        log-start yes;
+        log-end no;
+      }
+    }
+  }
+}
+import {
+  network {
+    interface [ ethernet1/1 ethernet1/2];
+  }
+}
+application-group;
+application;
+mgt-config {
+  users {
+    admin {
+      phash $5$wrbttprj$erPVtQaE1kF2oPdBkKT3AJAJMUbNbiElJBzByyiCSk1;
+      permissions {
+        role-based {
+          superuser yes;
+        }
+      }
+    }
+  }
+  password-complexity {
+    enabled yes;
+    minimum-length 8;
+  }
+}
+[edit]                                                                                                                                      
