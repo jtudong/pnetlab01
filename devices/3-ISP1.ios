@@ -1,8 +1,9 @@
-Current configuration : 3074 bytes
+Current configuration : 3098 bytes
 !
-! No configuration change since last restart
+! Last configuration change at 09:59:01 MST Sun Dec 15 2024
 !
 version 15.7
+service config
 service timestamps debug datetime msec localtime show-timezone year
 service timestamps log datetime msec localtime show-timezone year
 no service password-encryption
@@ -85,8 +86,8 @@ redundancy
 !
 !
 interface Ethernet0/0
- description lab-pa-220
- ip address 192.0.2.33 255.255.255.0
+ description PA-410
+ ip address 10.0.1.21 255.255.255.0
  ip nat outside
  ip virtual-reassembly in
  duplex auto
@@ -180,7 +181,7 @@ ip forward-protocol nd
 no ip http server
 no ip http secure-server
 ip nat inside source list 1 interface Ethernet0/0 overload
-ip route 0.0.0.0 0.0.0.0 192.0.2.1 250
+ip route 0.0.0.0 0.0.0.0 10.0.1.1 250
 ip ssh version 2
 !
 ipv6 ioam timestamp
@@ -220,8 +221,10 @@ line vty 0 4
  transport input telnet ssh
 !
 ntp server 216.239.35.0
-ntp server pool.ntp.org
+ntp server 34.202.215.187
 ntp server 216.239.35.4 prefer
-ntp server 34.208.249.133
+ntp server pool.ntp.org
 !
 end
+
+ISP1#

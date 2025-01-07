@@ -1,6 +1,6 @@
-Current configuration : 3976 bytes
+Current configuration : 4049 bytes
 !
-! Last configuration change at 15:45:58 MST Thu Nov 21 2024
+! Last configuration change at 17:40:49 MST Tue Dec 17 2024
 !
 version 15.2
 service timestamps debug datetime msec localtime show-timezone year
@@ -84,11 +84,13 @@ interface Ethernet0/0
 interface Ethernet0/1
  description fw2 eth1/2
  switchport access vlan 255
- switchport mode access
+ switchport trunk encapsulation dot1q
+ switchport trunk native vlan 255
+ switchport mode trunk
  spanning-tree portfast edge
 !
 interface Ethernet0/2
- description fw1 mgmt
+ description fw mgmt
  switchport access vlan 92
  switchport mode access
  spanning-tree portfast edge
@@ -106,8 +108,7 @@ interface Ethernet1/0
  spanning-tree portfast edge
 !
 interface Ethernet1/1
- description fw2 mgmt
- switchport access vlan 92
+ switchport access vlan 10
  switchport mode access
  spanning-tree portfast edge
 !
@@ -118,7 +119,7 @@ interface Ethernet1/2
  spanning-tree portfast edge
 !
 interface Ethernet1/3
- description panorama
+ description dc2
  switchport access vlan 20
  switchport mode access
  spanning-tree portfast edge
@@ -162,12 +163,13 @@ interface Ethernet3/3
 interface Vlan10
  description workstations
  ip address 10.1.10.1 255.255.255.0
- ip helper-address 10.1.20.8 
+ ip helper-address 10.1.20.7 
  ip ospf 1 area 0.0.0.0
 !
 interface Vlan20
  description servers
  ip address 10.1.20.1 255.255.255.0
+ ip helper-address 10.1.20.7 
  ip ospf 1 area 0.0.0.0
 !
 interface Vlan92
@@ -227,3 +229,5 @@ ntp server 216.239.35.4 prefer
 !
 !
 end
+
+site01-core-sw1#

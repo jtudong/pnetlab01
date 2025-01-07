@@ -1,6 +1,6 @@
-Current configuration : 2433 bytes
+Current configuration : 2145 bytes
 !
-! Last configuration change at 15:45:47 MST Thu Nov 21 2024
+! Last configuration change at 10:24:27 MST Sun Dec 15 2024
 !
 version 15.2
 service timestamps debug datetime msec localtime show-timezone year
@@ -87,30 +87,6 @@ interface Ethernet0/3
  switchport access vlan 92
  switchport mode access
  spanning-tree portfast edge
-!
-interface Ethernet1/0
-!
-interface Ethernet1/1
-!
-interface Ethernet1/2
-!
-interface Ethernet1/3
-!
-interface Ethernet2/0
-!
-interface Ethernet2/1
-!
-interface Ethernet2/2
-!
-interface Ethernet2/3
-!
-interface Ethernet3/0
-!
-interface Ethernet3/1
-!
-interface Ethernet3/2
-!
-interface Ethernet3/3
 !
 interface Vlan92
  description management
