@@ -1,0 +1,1261 @@
+device-group {
+  sites {
+    devices;
+    post-rulebase {
+      security {
+        rules;
+      }
+    }
+    pre-rulebase {
+      security {
+        rules {
+          "block unwanted apps" {
+            to outside;
+            from any;
+            source any;
+            destination any;
+            source-user any;
+            category any;
+            application [ quic quic-base];
+            service application-default;
+            source-hip any;
+            destination-hip any;
+            action drop;
+          }
+          "permit common apps" {
+            to outside;
+            from any;
+            source any;
+            destination any;
+            source-user any;
+            category any;
+            application [ dns ntp ssl web-browsing];
+            service application-default;
+            source-hip any;
+            destination-hip any;
+            action allow;
+            log-start no;
+            log-end yes;
+          }
+          "permit sanctioned apps" {
+            to outside;
+            from any;
+            source any;
+            destination any;
+            source-user any;
+            category any;
+            application sanctioned_apps;
+            service application-default;
+            source-hip any;
+            destination-hip any;
+            action allow;
+            log-start no;
+            log-end yes;
+            target {
+              negate no;
+            }
+            rule-type interzone;
+          }
+          "Permit site-to-site vpn" {
+            target {
+              negate no;
+            }
+            to any;
+            from outside;
+            source [ 100.64.1.2 100.64.1.10];
+            destination [ 100.64.1.2 100.64.1.10];
+            source-user any;
+            category any;
+            application [ ike ipsec-esp ipsec-esp-udp];
+            service application-default;
+            source-hip any;
+            destination-hip any;
+            action allow;
+          }
+        }
+      }
+    }
+  }
+  site01 {
+    application;
+    application-group;
+    service;
+    service-group;
+    schedule;
+    pre-rulebase {
+      nat {
+        rules {
+          "default DIPP" {
+            source-translation {
+              dynamic-ip-and-port {
+                interface-address {
+                  interface ethernet1/1;
+                  ip 100.64.1.2/29;
+                }
+              }
+            }
+            to outside;
+            from inside;
+            source any;
+            destination any;
+            service any;
+            to-interface ethernet1/1;
+          }
+        }
+      }
+      security {
+        rules {
+          "default allow" {
+            to any;
+            from any;
+            source any;
+            destination any;
+            source-user any;
+            category any;
+            application any;
+            service any;
+            source-hip any;
+            destination-hip any;
+            action allow;
+            log-start no;
+            log-end yes;
+          }
+          "default deny" {
+            to any;
+            from any;
+            source any;
+            destination any;
+            source-user any;
+            category any;
+            application any;
+            service any;
+            source-hip any;
+            destination-hip any;
+            action deny;
+            log-start yes;
+            log-end no;
+          }
+        }
+      }
+    }
+    post-rulebase {
+      default-security-rules {
+        rules {
+          intrazone-default {
+            action allow;
+            log-start yes;
+            log-end no;
+          }
+          interzone-default {
+            action allow;
+            log-start yes;
+            log-end no;
+          }
+        }
+      }
+    }
+    devices {
+      007254000367539 {
+        vsys {
+          vsys1;
+        }
+      }
+      007254000367630;
+    }
+    user-group-source {
+      master-device {
+        device 007254000367539;
+        vsys vsys1;
+        sync-group no;
+      }
+    }
+  }
+}
+deviceconfig {
+  system {
+    ip-address 10.1.20.9;
+    netmask 255.255.255.0;
+    update-server updates.paloaltonetworks.com;
+    update-schedule {
+      threats {
+        recurring {
+          hourly {
+            at 10;
+            action download-and-install;
+          }
+          threshold 8;
+          new-app-threshold 24;
+        }
+      }
+      anti-virus {
+        recurring {
+          hourly {
+            at 5;
+            action download-and-install;
+          }
+          threshold 8;
+        }
+      }
+      wildfire {
+        recurring {
+          every-15-mins {
+            at 0;
+            action download-and-install;
+          }
+        }
+      }
+    }
+    timezone America/Phoenix;
+    service {
+      disable-telnet yes;
+      disable-http yes;
+    }
+    device-telemetry {
+      device-health-performance yes;
+      product-usage yes;
+      threat-prevention yes;
+      region Americas;
+    }
+    hostname Panorama;
+    type {
+      static;
+    }
+    default-gateway 10.1.20.1;
+    dns-setting {
+      servers {
+        primary 10.1.20.7;
+        secondary 10.1.20.8;
+      }
+    }
+    login-banner "unauthorized access prohibited";
+    ssl-tls-service-profile panorama_mgmt_tls;
+  }
+  setting {
+    management {
+      storage-partition {
+        internal;
+      }
+      hostname-type-in-syslog FQDN;
+      idle-timeout 480;
+    }
+  }
+}
+template {
+  site01 {
+    settings {
+      default-vsys vsys1;
+    }
+    config {
+      devices {
+        localhost.localdomain {
+          vsys {
+            vsys1 {
+              zone {
+                outside {
+                  network {
+                    layer3 ethernet1/1;
+                  }
+                }
+                inside {
+                  network {
+                    layer3 ethernet1/2;
+                  }
+                  enable-user-identification yes;
+                }
+                vpn {
+                  network {
+                    layer3 tunnel.21;
+                  }
+                }
+              }
+              import {
+                network {
+                  interface [ ethernet1/1 ethernet1/2 vlan loopback tunnel sdwan tunnel.21];
+                  vlan;
+                  virtual-router [ default VR1];
+                  logical-router;
+                  virtual-wire;
+                }
+              }
+              certificate;
+              ssl-tls-service-profile;
+            }
+          }
+          deviceconfig {
+            system {
+              type {
+                static;
+              }
+              service {
+                disable-telnet yes;
+                disable-http yes;
+              }
+              device-telemetry {
+                device-health-performance yes;
+                product-usage yes;
+                threat-prevention yes;
+                region Americas;
+              }
+              panorama {
+                local-panorama {
+                  panorama-server panorama.shamrock.lab;
+                }
+              }
+              ssl-tls-service-profile "site01 mgmt";
+            }
+            setting {
+              config {
+                rematch yes;
+              }
+              management {
+                hostname-type-in-syslog FQDN;
+              }
+              auto-mac-detect yes;
+            }
+          }
+          network {
+            interface {
+              ethernet {
+                ethernet1/1 {
+                  layer3 {
+                    ndp-proxy {
+                      enabled no;
+                    }
+                    sdwan-link-settings {
+                      upstream-nat {
+                        enable no;
+                        static-ip;
+                      }
+                      enable no;
+                    }
+                    ip {
+                      100.64.1.2/29;
+                    }
+                    lldp {
+                      enable no;
+                    }
+                    interface-management-profile "ping profile";
+                  }
+                  comment site01-pub-s1;
+                }
+                ethernet1/2 {
+                  layer3 {
+                    ndp-proxy {
+                      enabled no;
+                    }
+                    sdwan-link-settings {
+                      upstream-nat {
+                        enable no;
+                        static-ip;
+                      }
+                      enable no;
+                    }
+                    ip {
+                      10.1.255.1/30;
+                    }
+                    interface-management-profile "inside profile";
+                    lldp {
+                      enable no;
+                    }
+                  }
+                  comment site01-core-sw1;
+                }
+              }
+              tunnel {
+                units {
+                  tunnel.21 {
+                    ip {
+                      10.0.0.1/30;
+                    }
+                    interface-management-profile "inside profile";
+                    comment "site02 tu1";
+                  }
+                }
+              }
+            }
+            profiles {
+              monitor-profile {
+                default {
+                  interval 3;
+                  threshold 5;
+                  action wait-recover;
+                }
+              }
+              interface-management-profile {
+                "ping profile" {
+                  ping yes;
+                }
+                "inside profile" {
+                  https yes;
+                  http-ocsp yes;
+                  ssh yes;
+                  snmp yes;
+                  userid-service yes;
+                  userid-syslog-listener-ssl yes;
+                  userid-syslog-listener-udp yes;
+                  ping yes;
+                  response-pages yes;
+                }
+              }
+            }
+            ike {
+              crypto-profiles {
+                ike-crypto-profiles {
+                  default {
+                    encryption [ aes-128-cbc 3des];
+                    hash sha1;
+                    dh-group group2;
+                    lifetime {
+                      hours 8;
+                    }
+                  }
+                  Suite-B-GCM-128 {
+                    encryption aes-128-cbc;
+                    hash sha256;
+                    dh-group group19;
+                    lifetime {
+                      hours 8;
+                    }
+                  }
+                  Suite-B-GCM-256 {
+                    encryption aes-256-cbc;
+                    hash sha384;
+                    dh-group group20;
+                    lifetime {
+                      hours 8;
+                    }
+                  }
+                }
+                ipsec-crypto-profiles {
+                  default {
+                    esp {
+                      encryption [ aes-128-cbc 3des];
+                      authentication sha1;
+                    }
+                    dh-group group2;
+                    lifetime {
+                      hours 1;
+                    }
+                  }
+                  Suite-B-GCM-128 {
+                    esp {
+                      encryption aes-128-gcm;
+                      authentication none;
+                    }
+                    dh-group group19;
+                    lifetime {
+                      hours 1;
+                    }
+                  }
+                  Suite-B-GCM-256 {
+                    esp {
+                      encryption aes-256-gcm;
+                      authentication none;
+                    }
+                    dh-group group20;
+                    lifetime {
+                      hours 1;
+                    }
+                  }
+                }
+                global-protect-app-crypto-profiles {
+                  default {
+                    encryption aes-256-gcm;
+                    authentication sha1;
+                  }
+                }
+              }
+              gateway {
+                site02-primary {
+                  authentication {
+                    pre-shared-key {
+                      key -AQ==fEqNCco3Yq9h5ZUglD3CZJT4lBs=TPKw8W+5h+VtffslpLSTkQ==;
+                    }
+                  }
+                  protocol {
+                    ikev1 {
+                      dpd {
+                        enable yes;
+                      }
+                    }
+                    ikev2 {
+                      dpd {
+                        enable yes;
+                      }
+                      ike-crypto-profile Suite-B-GCM-256;
+                    }
+                    version ikev2;
+                  }
+                  local-address {
+                    ip 100.64.1.2/29;
+                    interface ethernet1/1;
+                  }
+                  protocol-common {
+                    nat-traversal {
+                      enable no;
+                    }
+                    fragmentation {
+                      enable no;
+                    }
+                  }
+                  peer-address {
+                    ip 100.64.1.10;
+                  }
+                }
+              }
+            }
+            qos {
+              profile {
+                default {
+                  class-bandwidth-type {
+                    mbps {
+                      class {
+                        class1 {
+                          priority real-time;
+                        }
+                        class2 {
+                          priority high;
+                        }
+                        class3 {
+                          priority high;
+                        }
+                        class4 {
+                          priority medium;
+                        }
+                        class5 {
+                          priority medium;
+                        }
+                        class6 {
+                          priority low;
+                        }
+                        class7 {
+                          priority low;
+                        }
+                        class8 {
+                          priority low;
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+            virtual-router {
+              default {
+                protocol {
+                  bgp {
+                    enable no;
+                    dampening-profile {
+                      default {
+                        cutoff 1.25;
+                        reuse 0.5;
+                        max-hold-time 900;
+                        decay-half-life-reachable 300;
+                        decay-half-life-unreachable 900;
+                        enable yes;
+                      }
+                    }
+                  }
+                }
+              }
+              VR1 {
+                ecmp {
+                  algorithm {
+                    ip-modulo;
+                  }
+                }
+                protocol {
+                  bgp {
+                    enable no;
+                    routing-options {
+                      graceful-restart {
+                        enable yes;
+                      }
+                    }
+                  }
+                  rip {
+                    enable no;
+                  }
+                  ospf {
+                    router-id 10.1.255.1;
+                    enable yes;
+                    area {
+                      0.0.0.0 {
+                        type {
+                          normal;
+                        }
+                        interface {
+                          ethernet1/2 {
+                            bfd {
+                              profile Inherit-vr-global-setting;
+                            }
+                            enable yes;
+                            passive no;
+                            gr-delay 10;
+                            metric 10;
+                            priority 1;
+                            hello-interval 10;
+                            dead-counts 4;
+                            retransmit-interval 5;
+                            transit-delay 1;
+                            link-type {
+                              broadcast;
+                            }
+                          }
+                        }
+                      }
+                      0.0.0.1 {
+                        type {
+                          normal;
+                        }
+                        interface {
+                          tunnel.21 {
+                            bfd {
+                              profile Inherit-vr-global-setting;
+                            }
+                            enable yes;
+                            passive no;
+                            gr-delay 10;
+                            metric 10;
+                            priority 1;
+                            hello-interval 10;
+                            dead-counts 4;
+                            retransmit-interval 5;
+                            transit-delay 1;
+                            link-type {
+                              p2p;
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                  ospfv3 {
+                    enable no;
+                  }
+                }
+                interface [ ethernet1/1 ethernet1/2 tunnel.21];
+                routing-table {
+                  ip {
+                    static-route {
+                      "primary default" {
+                        nexthop {
+                          ip-address 100.64.1.1;
+                        }
+                        bfd {
+                          profile None;
+                        }
+                        interface ethernet1/1;
+                        metric 10;
+                        destination 0.0.0.0/0;
+                        route-table {
+                          unicast;
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+            tunnel {
+              ipsec {
+                site02-primary {
+                  auto-key {
+                    ike-gateway {
+                      site02-primary;
+                    }
+                    ipsec-crypto-profile Suite-B-GCM-256;
+                  }
+                  tunnel-monitor {
+                    enable yes;
+                    destination-ip 10.0.0.2;
+                  }
+                  tunnel-interface tunnel.21;
+                }
+              }
+            }
+          }
+        }
+      }
+      mgt-config {
+        users {
+          __openconfig {
+            phash $5$mybnmjxk$r.zcmRuEo0iIERni0zM8LYTDKB1yTmqFPKMIuUbabiC;
+            permissions {
+              role-based {
+                deviceadmin localhost.localdomain;
+              }
+            }
+          }
+        }
+        password-complexity {
+          enabled yes;
+          minimum-length 8;
+        }
+      }
+      shared {
+        certificate {
+          site01 {
+            subject-hash 4d83ff07;
+            issuer-hash 880a77ee;
+            not-valid-before "Jan 28 02:59:22 2025 GMT";
+            issuer "DC = lab, DC = shamrock, CN = shamrock-lab-ca";
+            not-valid-after "Jan 28 02:59:22 2027 GMT";
+            common-name site01;
+            expiry-epoch 1801105162;
+            ca no;
+            subject "C = US, ST = AZ, O = Shamrock Lab, OU = Network, CN = site01";
+            public-key "-----BEGIN CERTIFICATE-----
+MIIHsTCCBZmgAwIBAgITFQAAAAzG3uAruovxUAAAAAAADDANBgkqhkiG9w0BAQsF
+ADBJMRMwEQYKCZImiZPyLGQBGRYDbGFiMRgwFgYKCZImiZPyLGQBGRYIc2hhbXJv
+Y2sxGDAWBgNVBAMTD3NoYW1yb2NrLWxhYi1jYTAeFw0yNTAxMjgwMjU5MjJaFw0y
+NzAxMjgwMjU5MjJaMFQxCzAJBgNVBAYTAlVTMQswCQYDVQQIEwJBWjEVMBMGA1UE
+ChMMU2hhbXJvY2sgTGFiMRAwDgYDVQQLEwdOZXR3b3JrMQ8wDQYDVQQDEwZzaXRl
+MDEwggIiMA0GCSqGSIb3DQEBAQUAA4ICDwAwggIKAoICAQDYUcaLvsxWDPoqHdHp
+a9sGlWN4Pb4+nVsrTJC3ECstQXQ+LYRhMBXj0IC8hKhHXIe/a9MpFIkbnAGUap0O
+U41NzMZTg4kgoyZWEXgBGi4Wakaz17ks/fZ6pT/oITsDBCOIFmrTW97LiiQ6qTCr
+W6xcPeI8dye3i3/oUJmu+8Ddc7mrYVmII8qwMGmahbUo7m0VvYFnT+Uzl7/Yu9mc
+pp1ltIZBoRP2Dd99A7FNLzaFdo+Ojn7IdRFh6RwGpn+QlbQQ3zK47d5NnFa1i3gj
+9Yz0l4MrhQMaWLy4rC45B/qVzw5qDXtPtD/rnym4K+U7by2+dvxJ7wrNEv+3PRoQ
+1APYmSzXtZyIp3n3hUPyNSCU9/3sogXDfNxfi7akrkuPN5eP4A2QS4go2jia7hLA
+N1LNco/LNdU+TZuGTtFibAr3ckwbwECE+J1tXwFx5heg/SsCEKNSdsWQHFv0FMFf
+KDCta5sRHKq3ltg258fSdcsvEXNNgzDOnFXWq4s/5HGcBxq80wEM9f6SjVICgd1d
+TM1YEeTh/oJl0Ol+ywa93I4mMlURWokkrWByh/WuwlhmmVmmb8qw8Rdh861GbNUg
+CDxnlKKxf7cvPc0kfGHhj4MA8+wLqcJBkIjpVtyKmYe0hhpyJz72TRl5aw0yhqip
+axOATm0mTROH+o2+WoPGCEY32QIDAQABo4IChTCCAoEwZQYDVR0RBF4wXIIXc2l0
+ZTAxLWZ3MS5zaGFtcm9jay5sYWKCCnNpdGUwMS1mdzGCF3NpdGUwMS1mdzIuc2hh
+bXJvY2subGFiggpzaXRlMDEtZncyhwQKAVwFhwQKAVwGhwQKAf8BMB0GA1UdDgQW
+BBTACrTEptMkwdWVVeT/FFpMWwFs7DAfBgNVHSMEGDAWgBRVULBomdFHLShb1yuX
+1Nqj398ITTCBygYDVR0fBIHCMIG/MIG8oIG5oIG2hoGzbGRhcDovLy9DTj1zaGFt
+cm9jay1sYWItY2EsQ049ZGMyLENOPUNEUCxDTj1QdWJsaWMlMjBLZXklMjBTZXJ2
+aWNlcyxDTj1TZXJ2aWNlcyxDTj1Db25maWd1cmF0aW9uLERDPXNoYW1yb2NrLERD
+PWxhYj9jZXJ0aWZpY2F0ZVJldm9jYXRpb25MaXN0P2Jhc2U/b2JqZWN0Q2xhc3M9
+Y1JMRGlzdHJpYnV0aW9uUG9pbnQwgcIGCCsGAQUFBwEBBIG1MIGyMIGvBggrBgEF
+BQcwAoaBomxkYXA6Ly8vQ049c2hhbXJvY2stbGFiLWNhLENOPUFJQSxDTj1QdWJs
+aWMlMjBLZXklMjBTZXJ2aWNlcyxDTj1TZXJ2aWNlcyxDTj1Db25maWd1cmF0aW9u
+LERDPXNoYW1yb2NrLERDPWxhYj9jQUNlcnRpZmljYXRlP2Jhc2U/b2JqZWN0Q2xh
+c3M9Y2VydGlmaWNhdGlvbkF1dGhvcml0eTAhBgkrBgEEAYI3FAIEFB4SAFcAZQBi
+AFMAZQByAHYAZQByMA4GA1UdDwEB/wQEAwIFoDATBgNVHSUEDDAKBggrBgEFBQcD
+ATANBgkqhkiG9w0BAQsFAAOCAgEAIN9Y+euJKtRHiJxBbOBkMvzPCT8QgYivlqUw
+oXGSH/cMCkSWk9b2+P84itO39kJr9XnbpsyUCbU/ExjsnVB9tdqzR10Dibt1KOI/
+0RHD72iFBOHvlmhDJIL+RQhsFqQQVCS+WeqDw63AxZ6CzntXtC8t/iS/wLj6vywj
+37bqBCiTNYexL/kWGZrsHnKPFYmrrErk+uDxr6UaigNlmRIIK9/fP0jKQW8Tvf4d
+oS7VXA5IjOWZzWYHjkZINIxg2GR5LxzttIbF2scQSGsX5XZuRFf+ywInsB/AHzoI
+KcVLCh0W+R9BRMkVmSprsu7rDcvLk9kQYhEaFsGFzIq5KcF50n+14VpdYWw6z7L7
+dA1hgzYj4+jNVjFF6JqtKrV5QiU2TnfWXCZZeMUj0fSUguC0QnV+bhGqFE9qTYBJ
+Fl4yvLdqzETuGYizGXogzGlSR0iqqJ21Gxov982FQ2LQPpAKUYX51PlB4BJaihoL
+vqA29wlOM8708p/ORPILzRNVv2RZYQN1M8HuYegbKgid765F4Uc28bZM0HSHJlaV
+/+pvbYqpg58wYOaerxEkEM5+6kp69rIHIwrwvQI0lcYLKm1tpV48TUABHiUyBT5M
+pFsj21YIesO2SrYAkzswpR0papHv6OcD8U9IGILVgyoWZ+2gZq6i+CS9XikZLL0z
+v3xtpEk=
+-----END CERTIFICATE-----
+";
+            algorithm RSA;
+            private-key -AQ==g1EV3WWkXx3uszavfNQMHEu0Rp8=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;
+          }
+        }
+        ssl-tls-service-profile {
+          "site01 mgmt" {
+            protocol-settings {
+              min-version tls1-2;
+              max-version max;
+            }
+            certificate site01;
+          }
+        }
+      }
+    }
+  }
+  baseline {
+    settings {
+      default-vsys vsys1;
+    }
+    config {
+      devices {
+        localhost.localdomain {
+          vsys {
+            vsys1;
+          }
+          deviceconfig {
+            system {
+              panorama {
+                local-panorama {
+                  panorama-server panorama.shamrock.lab;
+                }
+              }
+              update-server updates.paloaltonetworks.com;
+              dns-setting {
+                servers {
+                  primary 10.1.20.7;
+                  secondary 10.1.20.8;
+                }
+              }
+              ntp-servers {
+                primary-ntp-server {
+                  ntp-server-address time.google.com;
+                }
+              }
+              update-schedule {
+                anti-virus {
+                  recurring {
+                    hourly {
+                      at 3;
+                      action download-and-install;
+                    }
+                    threshold 8;
+                  }
+                }
+                threats {
+                  recurring {
+                    every-30-mins {
+                      at 5;
+                      action download-and-install;
+                    }
+                    threshold 8;
+                    new-app-threshold 24;
+                  }
+                }
+                global-protect-clientless-vpn {
+                  recurring {
+                    weekly {
+                      at 00:00;
+                      day-of-week sunday;
+                      action download-and-install;
+                    }
+                  }
+                }
+                global-protect-datafile {
+                  recurring {
+                    weekly {
+                      at 00:15;
+                      day-of-week sunday;
+                      action download-and-install;
+                    }
+                  }
+                }
+                wildfire {
+                  recurring {
+                    every-15-mins {
+                      at 0;
+                      action download-and-install;
+                    }
+                  }
+                }
+              }
+              domain shamrock.lab;
+              login-banner "Do not proceed without authorization";
+              timezone America/Phoenix;
+            }
+            setting {
+              management {
+                idle-timeout 480;
+                auto-acquire-commit-lock yes;
+              }
+            }
+          }
+        }
+      }
+      mgt-config {
+        users {
+          admin {
+            permissions {
+              role-based {
+                superuser yes;
+              }
+            }
+            phash $5$ubtfsaoa$oR0EO6ZbrCH6dm0yFNxhGqqmnz24Peit1dlSSdEelh9;
+          }
+          lab {
+            permissions {
+              role-based {
+                superuser yes;
+              }
+            }
+            authentication-profile shamrock.lab-ldap;
+          }
+        }
+      }
+      shared {
+        certificate {
+          shamrock-lab-ca {
+            subject-hash 880a77ee;
+            issuer-hash 880a77ee;
+            not-valid-before "Jan 28 01:13:21 2025 GMT";
+            issuer "DC = lab, DC = shamrock, CN = shamrock-lab-ca";
+            not-valid-after "Jan 28 01:23:19 2035 GMT";
+            common-name shamrock-lab-ca;
+            expiry-epoch 2053560199;
+            ca yes;
+            subject "DC = lab, DC = shamrock, CN = shamrock-lab-ca";
+            public-key "-----BEGIN CERTIFICATE-----
+MIIFbTCCA1WgAwIBAgIQPRlrpxgFv7pPmppDuYxm9DANBgkqhkiG9w0BAQsFADBJ
+MRMwEQYKCZImiZPyLGQBGRYDbGFiMRgwFgYKCZImiZPyLGQBGRYIc2hhbXJvY2sx
+GDAWBgNVBAMTD3NoYW1yb2NrLWxhYi1jYTAeFw0yNTAxMjgwMTEzMjFaFw0zNTAx
+MjgwMTIzMTlaMEkxEzARBgoJkiaJk/IsZAEZFgNsYWIxGDAWBgoJkiaJk/IsZAEZ
+FghzaGFtcm9jazEYMBYGA1UEAxMPc2hhbXJvY2stbGFiLWNhMIICIjANBgkqhkiG
+9w0BAQEFAAOCAg8AMIICCgKCAgEAmaPAVvE56uQiASQjn/PUXcPVYGTXcD6jdoX8
+GyuWvjrt64zs0zjW4nNLN1XLoCbu6ywXpXk9fIkz0bwSto4CKq2QSt/5Ki8xsqD9
+xDzlgvAb9JOuiboYdcZ1U/xmtK3WUHHb80kaHi5ph/a5eB009dqFXWVX6rIKmS7H
+6uN6WVsOWN2Sovob87mtGuDHO+dbEVpd//iEFBHPJ2E0ibXGM6OzFZtHKT0/02hp
+xGi4OUt8HHJ1YDa5gOt/Hjvqxih7YFO9zDrVPkrDJGCyPO/GTi/zpXKWPI9IUTcG
+szLlGfaW/mREpk7mlTT5cddyyxyZpSjBKrF3caHZ49+Dszb3TvVHyjhrPwi9rbNY
+u7xM9AdvbqfpNE9Spgn5AbwS3XXekdKBVCv3hx/nd0O9on8ajOiFcsaoU/DeSDQP
+7ibbalWzR2CoYgQ0pXgKI7yFjvRqc1u9eBlSoDYftbrdsSZ/NwbTfvlFHZcnKRGo
+vN5p2n8A0dSsxjMAYnhRx50jNdYRhTlMJmKNds030rfcfzVQWCjMHPEs6h9+sZOA
+dEfNKrWdy15rWC+0/7a4yOv4Uqe0RF1azhRLEoul9NaBGhOpWkqDgBUQbKPBU2Xc
+hPWZ0SinKQLineTWclgk3F4WzLDFktbFYTJHJjIg08NAoxhl0KuZ3eDABhyhpNeS
+xAUB6jECAwEAAaNRME8wCwYDVR0PBAQDAgGGMA8GA1UdEwEB/wQFMAMBAf8wHQYD
+VR0OBBYEFFVQsGiZ0UctKFvXK5fU2qPf3whNMBAGCSsGAQQBgjcVAQQDAgEAMA0G
+CSqGSIb3DQEBCwUAA4ICAQB+YUR3e0e72I6+Xg0rzst7KIlPHvLpcXWc+HsXbuzZ
+S8dUuTntjpfGI4e+YCCOuFpu69P93nxFBGUuuzsXK9LmEWoV9oIpffGmsn0Iodak
+MAsHEuupWpb6sPEowECZpA1NVwvhDyr7WijgyGpCX3864yCNbeIsaT+ae/5rmX0M
+idFuF86Nf1Hcm9BYeNVv2o3M8bgBwH9JtOQLYRDw4Xw8NcwUA21ljojRygWWVQQ3
+74QkQVKih+tTnB62Nh247tprMgfAnMW1UwAhjgGgAaPoXQvxlUVmwF1Ia5wzBZl9
+V40Ng/lgQj89IbW54uOtcD+YK0kHk9J5CVkWOrtzQUqKQIJZk4HHrQcyXHXThYTH
+TJ8oifjNdyBSnrKR15+mxvdVJEo6Nl+plfUofKxV5xLZa0lhgNFUg0x8FS9HkV0J
++KdwqW08jHbUtoQ8p2fSOjzeCtNUq55R1uoRzA/waEH5t4nFClSZFpk28m488W6Z
+oMxYi3rokgIQMbzYgVoqJ7za6sHpiw8+Spe4gj7G8flDgRStb0S+YmgOeWu19cz1
+qhLaZXwiKgjdBl/PKlxpkJA19lyu2Kg1ZWpQXykM9GLsB6FN3uGTUizs3nlTxFh4
+rSB4l8pletXz2CT51HLiDIGVThWz72n/mnoEmH/Xc6QUGrkeNYkj2NekXxLVUpu0
+CA==
+-----END CERTIFICATE-----
+";
+            algorithm RSA;
+          }
+        }
+        server-profile {
+          ldap {
+            shamrock.lab-ad-389 {
+              server {
+                dc1 {
+                  address 10.1.20.7;
+                  port 389;
+                }
+                dc2 {
+                  address 10.1.20.8;
+                  port 389;
+                }
+              }
+              ldap-type active-directory;
+              bind-dn CN=svc_ldap,OU=service_accounts,DC=shamrock,DC=lab;
+              bind-password -AQ==E3IBJ3pufeRKdFuAd+xxaAuM7Qk=PM8yGuEXJhllaJ1xZ2pFaQ==;
+              ssl yes;
+              base DC=shamrock,DC=lab;
+            }
+          }
+        }
+        authentication-profile {
+          shamrock.lab-ldap {
+            method {
+              ldap {
+                server-profile shamrock.lab-ad-389;
+              }
+            }
+            multi-factor-auth {
+              mfa-enable no;
+            }
+            allow-list all;
+            lockout {
+              lockout-time 10;
+              failed-attempts 5;
+            }
+            user-domain shamrock.lab;
+          }
+        }
+      }
+    }
+  }
+}
+template-stack {
+  site01_stack {
+    settings {
+      default-vsys vsys1;
+    }
+    templates [ site01 baseline];
+    devices {
+      007254000367539;
+      007254000367630;
+    }
+    user-group-source {
+      master-device {
+        device 007254000367539;
+      }
+    }
+  }
+}
+mgt-config {
+  devices {
+    007254000367539;
+    007254000367630;
+  }
+  users {
+    admin {
+      phash $5$mxwewssa$R9JlQbKFGvdCvRzOe6kPId4tTMFWlmnXeHv5qG.jUo0;
+      permissions {
+        role-based {
+          superuser yes;
+        }
+      }
+    }
+    __vm_series {
+      phash $5$uabdidhp$6/8HWbX6TrGSpM1xzx5pi5YaMlXJG4I1P4pAULp.7ZD;
+      permissions {
+        role-based {
+          panorama-admin yes;
+        }
+      }
+    }
+    lab {
+      permissions {
+        role-based {
+          superuser yes;
+        }
+      }
+      authentication-profile shamrock.lab-ldap;
+    }
+  }
+  password-complexity {
+    enabled yes;
+    minimum-length 8;
+  }
+}
+panorama {
+  certificate {
+    shamrock-lab-ca {
+      subject-hash 880a77ee;
+      issuer-hash 880a77ee;
+      not-valid-before "Jan 28 01:13:21 2025 GMT";
+      issuer "DC = lab, DC = shamrock, CN = shamrock-lab-ca";
+      not-valid-after "Jan 28 01:23:19 2035 GMT";
+      common-name shamrock-lab-ca;
+      expiry-epoch 2053560199;
+      ca yes;
+      subject "DC = lab, DC = shamrock, CN = shamrock-lab-ca";
+      public-key "-----BEGIN CERTIFICATE-----
+MIIFbTCCA1WgAwIBAgIQPRlrpxgFv7pPmppDuYxm9DANBgkqhkiG9w0BAQsFADBJ
+MRMwEQYKCZImiZPyLGQBGRYDbGFiMRgwFgYKCZImiZPyLGQBGRYIc2hhbXJvY2sx
+GDAWBgNVBAMTD3NoYW1yb2NrLWxhYi1jYTAeFw0yNTAxMjgwMTEzMjFaFw0zNTAx
+MjgwMTIzMTlaMEkxEzARBgoJkiaJk/IsZAEZFgNsYWIxGDAWBgoJkiaJk/IsZAEZ
+FghzaGFtcm9jazEYMBYGA1UEAxMPc2hhbXJvY2stbGFiLWNhMIICIjANBgkqhkiG
+9w0BAQEFAAOCAg8AMIICCgKCAgEAmaPAVvE56uQiASQjn/PUXcPVYGTXcD6jdoX8
+GyuWvjrt64zs0zjW4nNLN1XLoCbu6ywXpXk9fIkz0bwSto4CKq2QSt/5Ki8xsqD9
+xDzlgvAb9JOuiboYdcZ1U/xmtK3WUHHb80kaHi5ph/a5eB009dqFXWVX6rIKmS7H
+6uN6WVsOWN2Sovob87mtGuDHO+dbEVpd//iEFBHPJ2E0ibXGM6OzFZtHKT0/02hp
+xGi4OUt8HHJ1YDa5gOt/Hjvqxih7YFO9zDrVPkrDJGCyPO/GTi/zpXKWPI9IUTcG
+szLlGfaW/mREpk7mlTT5cddyyxyZpSjBKrF3caHZ49+Dszb3TvVHyjhrPwi9rbNY
+u7xM9AdvbqfpNE9Spgn5AbwS3XXekdKBVCv3hx/nd0O9on8ajOiFcsaoU/DeSDQP
+7ibbalWzR2CoYgQ0pXgKI7yFjvRqc1u9eBlSoDYftbrdsSZ/NwbTfvlFHZcnKRGo
+vN5p2n8A0dSsxjMAYnhRx50jNdYRhTlMJmKNds030rfcfzVQWCjMHPEs6h9+sZOA
+dEfNKrWdy15rWC+0/7a4yOv4Uqe0RF1azhRLEoul9NaBGhOpWkqDgBUQbKPBU2Xc
+hPWZ0SinKQLineTWclgk3F4WzLDFktbFYTJHJjIg08NAoxhl0KuZ3eDABhyhpNeS
+xAUB6jECAwEAAaNRME8wCwYDVR0PBAQDAgGGMA8GA1UdEwEB/wQFMAMBAf8wHQYD
+VR0OBBYEFFVQsGiZ0UctKFvXK5fU2qPf3whNMBAGCSsGAQQBgjcVAQQDAgEAMA0G
+CSqGSIb3DQEBCwUAA4ICAQB+YUR3e0e72I6+Xg0rzst7KIlPHvLpcXWc+HsXbuzZ
+S8dUuTntjpfGI4e+YCCOuFpu69P93nxFBGUuuzsXK9LmEWoV9oIpffGmsn0Iodak
+MAsHEuupWpb6sPEowECZpA1NVwvhDyr7WijgyGpCX3864yCNbeIsaT+ae/5rmX0M
+idFuF86Nf1Hcm9BYeNVv2o3M8bgBwH9JtOQLYRDw4Xw8NcwUA21ljojRygWWVQQ3
+74QkQVKih+tTnB62Nh247tprMgfAnMW1UwAhjgGgAaPoXQvxlUVmwF1Ia5wzBZl9
+V40Ng/lgQj89IbW54uOtcD+YK0kHk9J5CVkWOrtzQUqKQIJZk4HHrQcyXHXThYTH
+TJ8oifjNdyBSnrKR15+mxvdVJEo6Nl+plfUofKxV5xLZa0lhgNFUg0x8FS9HkV0J
++KdwqW08jHbUtoQ8p2fSOjzeCtNUq55R1uoRzA/waEH5t4nFClSZFpk28m488W6Z
+oMxYi3rokgIQMbzYgVoqJ7za6sHpiw8+Spe4gj7G8flDgRStb0S+YmgOeWu19cz1
+qhLaZXwiKgjdBl/PKlxpkJA19lyu2Kg1ZWpQXykM9GLsB6FN3uGTUizs3nlTxFh4
+rSB4l8pletXz2CT51HLiDIGVThWz72n/mnoEmH/Xc6QUGrkeNYkj2NekXxLVUpu0
+CA==
+-----END CERTIFICATE-----
+";
+      algorithm RSA;
+    }
+    "panorama tls" {
+      common-name panorama.shamrock.lab;
+      subject "C = US, ST = AZ, O = Shamrock Lab, CN = panorama.shamrock.lab";
+      algorithm RSA;
+      private-key -AQ==kuQhknLCl0udqOUJGdxq80pbnIk=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;
+      subject-hash b8056bd4;
+      issuer-hash 880a77ee;
+      not-valid-before "Jan 28 02:38:01 2025 GMT";
+      issuer "DC = lab, DC = shamrock, CN = shamrock-lab-ca";
+      not-valid-after "Jan 28 02:38:01 2027 GMT";
+      expiry-epoch 1801103881;
+      ca no;
+      public-key "-----BEGIN CERTIFICATE-----
+MIIHbzCCBVegAwIBAgITFQAAAAukOPa8a495ewAAAAAACzANBgkqhkiG9w0BAQsF
+ADBJMRMwEQYKCZImiZPyLGQBGRYDbGFiMRgwFgYKCZImiZPyLGQBGRYIc2hhbXJv
+Y2sxGDAWBgNVBAMTD3NoYW1yb2NrLWxhYi1jYTAeFw0yNTAxMjgwMjM4MDFaFw0y
+NzAxMjgwMjM4MDFaMFExCzAJBgNVBAYTAlVTMQswCQYDVQQIEwJBWjEVMBMGA1UE
+ChMMU2hhbXJvY2sgTGFiMR4wHAYDVQQDExVwYW5vcmFtYS5zaGFtcm9jay5sYWIw
+ggIiMA0GCSqGSIb3DQEBAQUAA4ICDwAwggIKAoICAQDs05UoqWSR844ZmiDxWntb
+LZzwL7dXxLTJ9o/Rh+wb6vv2M8kre090E5Yfbo8XW2mazRKHNv8oMIn29LbItjd8
+vl5WxfjvZxCoZqmQ7pnk6+ihPtlGqWSnXDvn7xvwjwsQ16OWkJOsYRvzGfm9BEc4
+0Ow4ggAvOFwTkJE4jusae/2oe+qalL28YYt/yKGy8Ujd7Fo1twKB5MVYBmCX5IvA
+y+F97bYJUgye63fLWzcTmnCL+3wV7iWlxGGX+OVVCoee2lHaNqqWVShujNCc+Z6K
+J9iiV/ZfgGugXOiVKQtjm3kwzrT1XPqxxNoaOIVs5RWhf18Hr896RWWGB+PSFZYM
+gV2q4I05TI1IUUZXtpX/3hsImDr6m9TlU2h4EUTZTyIrZTMfhGjLYHvjMOLHg86q
+VZPS0LjFxvljSIYSyil9e8WvdC/LfrNaoMP0ZFwpsXt7EVf1pP7XHugfZZvJKIYX
+7Zzx5Y1TmfTIvRP+86w71BFYi5/SJA+T3LjJZcRw1svrX+L5WLfw0c2j9BwTm+Wt
+6pGbDLEFzkEQIpf/tcQaXL4j0a84+zBQv3Ed1/uyv8I1yjTKRnlzLFb1N/Klr6c0
+EpT2+8+fzJzqMQBwp6cE4bMu98XR29PKsMuAW6fpnQ+DTQp9DiUr3EXIfVPXHj3U
+GE2d/fpgNM/W1wm7ps3sdwIDAQABo4ICRjCCAkIwJgYDVR0RBB8wHYIVcGFub3Jh
+bWEuc2hhbXJvY2subGFihwQKARQJMB0GA1UdDgQWBBT7Azb5fuSG66nJKI+EgtoY
+1cu7DjAfBgNVHSMEGDAWgBRVULBomdFHLShb1yuX1Nqj398ITTCBygYDVR0fBIHC
+MIG/MIG8oIG5oIG2hoGzbGRhcDovLy9DTj1zaGFtcm9jay1sYWItY2EsQ049ZGMy
+LENOPUNEUCxDTj1QdWJsaWMlMjBLZXklMjBTZXJ2aWNlcyxDTj1TZXJ2aWNlcyxD
+Tj1Db25maWd1cmF0aW9uLERDPXNoYW1yb2NrLERDPWxhYj9jZXJ0aWZpY2F0ZVJl
+dm9jYXRpb25MaXN0P2Jhc2U/b2JqZWN0Q2xhc3M9Y1JMRGlzdHJpYnV0aW9uUG9p
+bnQwgcIGCCsGAQUFBwEBBIG1MIGyMIGvBggrBgEFBQcwAoaBomxkYXA6Ly8vQ049
+c2hhbXJvY2stbGFiLWNhLENOPUFJQSxDTj1QdWJsaWMlMjBLZXklMjBTZXJ2aWNl
+cyxDTj1TZXJ2aWNlcyxDTj1Db25maWd1cmF0aW9uLERDPXNoYW1yb2NrLERDPWxh
+Yj9jQUNlcnRpZmljYXRlP2Jhc2U/b2JqZWN0Q2xhc3M9Y2VydGlmaWNhdGlvbkF1
+dGhvcml0eTAhBgkrBgEEAYI3FAIEFB4SAFcAZQBiAFMAZQByAHYAZQByMA4GA1Ud
+DwEB/wQEAwIFoDATBgNVHSUEDDAKBggrBgEFBQcDATANBgkqhkiG9w0BAQsFAAOC
+AgEAL89NpyYXiGREFMjyVmZw9trzsDtCSLndGC2xh6wLcLqBuRBYj5sXjKsh896c
+ltpR+uRkY0wrNIiTdYNTdTvcr5NSzUr8b8MYtGG/Uu0ZIpFWCn3hYYfyim3qfxex
+9v1QXFQgyFx/lIZSPYhh4RsY1SS9afNjb9IgnjD8wFashxhIwvQabMR+bZq2j56j
+UKEGBPk8r+yiZdx/1Z31gj0LLy89GG8qZNc2bpEqV47UCr/O7BuQzOggMxc46QA4
+ZcEzGKOqantFiiFGnyjwmCKwrmCME5lEgpD/O/C0BTG6RomY7EU45H1ZEOQzLTWw
+CiEYG+zDHTJ++742LgS+WgzOloH8YbEf6+i6ChGFReG0GeqK27TOTMkLiGSIA9gt
+jRWYAGhodm9Sz9fRO3ma40e8o9H90AckT+7FUXzF23sOgIvFpPiR6ef/NeYc99Zt
+6znTVZDSkbN8qdKbvae0QaJuzhY1PmEUq3PPtq1quDT69cEQoLObv9c9euiNRYTq
+3e05v9zxUm9uER6H2psaypSCAFz4ku0EchMGXdvIuQzIOoWntbhP8OjevkpTtjZa
+BesJLAZCBqHyedNZU0EUJO73fCtISC7HOfP3RJMPlc3VMCD2YXsgxrgR3Upc59wa
+iabp+eKuO8CaDMPFtCKiMbmD0zafaJ/6oQyBSvQS2FtSW+U=
+-----END CERTIFICATE-----
+";
+    }
+  }
+  ssl-decrypt {
+    trusted-root-CA shamrock-lab-ca;
+  }
+  ssl-tls-service-profile {
+    panorama_mgmt_tls {
+      protocol-settings {
+        min-version tls1-2;
+        max-version max;
+      }
+      certificate "panorama tls";
+    }
+  }
+  server-profile {
+    ldap {
+      shamrock.lab-ad-389 {
+        server {
+          dc1 {
+            address 10.1.20.7;
+            port 389;
+          }
+          dc2 {
+            address 10.1.20.8;
+            port 389;
+          }
+        }
+        ldap-type active-directory;
+        bind-dn CN=svc_ldap,OU=service_accounts,DC=shamrock,DC=lab;
+        bind-password -AQ==E3IBJ3pufeRKdFuAd+xxaAuM7Qk=PM8yGuEXJhllaJ1xZ2pFaQ==;
+        ssl yes;
+        base DC=shamrock,DC=lab;
+      }
+    }
+  }
+  authentication-profile {
+    shamrock.lab-ldap {
+      method {
+        ldap {
+          server-profile shamrock.lab-ad-389;
+        }
+      }
+      allow-list all;
+      lockout {
+        lockout-time 10;
+        failed-attempts 5;
+      }
+      user-domain shamrock.lab;
+    }
+  }
+}
+readonly {
+  devices {
+    localhost.localdomain {
+      device-group {
+        sites {
+          id 11;
+        }
+        site01 {
+          id 12;
+          parent-dg sites;
+        }
+      }
+      template {
+        site01 {
+          id 13;
+          config {
+            devices {
+              localhost.localdomain {
+                vsys {
+                  vsys1 {
+                    zone {
+                      outside {
+                        id 14;
+                      }
+                      inside {
+                        id 15;
+                      }
+                      vpn {
+                        id 18;
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+        baseline {
+          id 17;
+        }
+      }
+      template-stack {
+        site01_stack {
+          id 16;
+        }
+      }
+    }
+  }
+  max-internal-id 18;
+}
+shared {
+  application;
+  application-group {
+    sanctioned_apps {
+      members [ sanctioned_software_update sanctioned_internet_utility sanctioned_general_business];
+    }
+  }
+  service;
+  service-group;
+  schedule;
+  application-filter {
+    sanctioned_software_update {
+      disable-override no;
+      category business-systems;
+      subcategory software-update;
+      risk [ 1 2];
+    }
+    sanctioned_internet_utility {
+      disable-override no;
+      category general-internet;
+      subcategory internet-utility;
+      risk [ 1 2];
+    }
+    sanctioned_general_business {
+      disable-override no;
+      category business-systems;
+      subcategory general-business;
+      risk [ 1 2];
+    }
+  }
+  tag {
+    outside {
+      color color19;
+    }
+  }
+}
+[edit]                                                                                                                            
