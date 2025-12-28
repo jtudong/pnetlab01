@@ -1,0 +1,593 @@
+set device-group sites devices 
+set device-group sites post-rulebase security rules 
+set device-group sites pre-rulebase security rules "block unwanted apps" to outside
+set device-group sites pre-rulebase security rules "block unwanted apps" from any
+set device-group sites pre-rulebase security rules "block unwanted apps" source any
+set device-group sites pre-rulebase security rules "block unwanted apps" destination any
+set device-group sites pre-rulebase security rules "block unwanted apps" source-user any
+set device-group sites pre-rulebase security rules "block unwanted apps" category any
+set device-group sites pre-rulebase security rules "block unwanted apps" application [ quic quic-base ]
+set device-group sites pre-rulebase security rules "block unwanted apps" service application-default
+set device-group sites pre-rulebase security rules "block unwanted apps" source-hip any
+set device-group sites pre-rulebase security rules "block unwanted apps" destination-hip any
+set device-group sites pre-rulebase security rules "block unwanted apps" action drop
+set device-group sites pre-rulebase security rules "permit common apps" to outside
+set device-group sites pre-rulebase security rules "permit common apps" from any
+set device-group sites pre-rulebase security rules "permit common apps" source any
+set device-group sites pre-rulebase security rules "permit common apps" destination any
+set device-group sites pre-rulebase security rules "permit common apps" source-user any
+set device-group sites pre-rulebase security rules "permit common apps" category any
+set device-group sites pre-rulebase security rules "permit common apps" application [ dns ntp ssl web-browsing ]
+set device-group sites pre-rulebase security rules "permit common apps" service application-default
+set device-group sites pre-rulebase security rules "permit common apps" source-hip any
+set device-group sites pre-rulebase security rules "permit common apps" destination-hip any
+set device-group sites pre-rulebase security rules "permit common apps" action allow
+set device-group sites pre-rulebase security rules "permit common apps" log-start no
+set device-group sites pre-rulebase security rules "permit common apps" log-end yes
+set device-group sites pre-rulebase security rules "permit sanctioned apps" to outside
+set device-group sites pre-rulebase security rules "permit sanctioned apps" from any
+set device-group sites pre-rulebase security rules "permit sanctioned apps" source any
+set device-group sites pre-rulebase security rules "permit sanctioned apps" destination any
+set device-group sites pre-rulebase security rules "permit sanctioned apps" source-user any
+set device-group sites pre-rulebase security rules "permit sanctioned apps" category any
+set device-group sites pre-rulebase security rules "permit sanctioned apps" application sanctioned_apps
+set device-group sites pre-rulebase security rules "permit sanctioned apps" service application-default
+set device-group sites pre-rulebase security rules "permit sanctioned apps" source-hip any
+set device-group sites pre-rulebase security rules "permit sanctioned apps" destination-hip any
+set device-group sites pre-rulebase security rules "permit sanctioned apps" action allow
+set device-group sites pre-rulebase security rules "permit sanctioned apps" log-start no
+set device-group sites pre-rulebase security rules "permit sanctioned apps" log-end yes
+set device-group sites pre-rulebase security rules "permit sanctioned apps" target negate no
+set device-group sites pre-rulebase security rules "permit sanctioned apps" rule-type interzone
+set device-group sites pre-rulebase security rules "Permit site-to-site vpn" target negate no
+set device-group sites pre-rulebase security rules "Permit site-to-site vpn" to any
+set device-group sites pre-rulebase security rules "Permit site-to-site vpn" from outside
+set device-group sites pre-rulebase security rules "Permit site-to-site vpn" source [ 100.64.1.2 100.64.1.10 ]
+set device-group sites pre-rulebase security rules "Permit site-to-site vpn" destination [ 100.64.1.2 100.64.1.10 ]
+set device-group sites pre-rulebase security rules "Permit site-to-site vpn" source-user any
+set device-group sites pre-rulebase security rules "Permit site-to-site vpn" category any
+set device-group sites pre-rulebase security rules "Permit site-to-site vpn" application [ ike ipsec-esp ipsec-esp-udp ]
+set device-group sites pre-rulebase security rules "Permit site-to-site vpn" service application-default
+set device-group sites pre-rulebase security rules "Permit site-to-site vpn" source-hip any
+set device-group sites pre-rulebase security rules "Permit site-to-site vpn" destination-hip any
+set device-group sites pre-rulebase security rules "Permit site-to-site vpn" action allow
+set device-group site01 application 
+set device-group site01 application-group 
+set device-group site01 service 
+set device-group site01 service-group 
+set device-group site01 schedule 
+set device-group site01 pre-rulebase nat rules "default DIPP" source-translation dynamic-ip-and-port interface-address interface ethernet1/1
+set device-group site01 pre-rulebase nat rules "default DIPP" source-translation dynamic-ip-and-port interface-address ip 100.64.1.2/29
+set device-group site01 pre-rulebase nat rules "default DIPP" to outside
+set device-group site01 pre-rulebase nat rules "default DIPP" from inside
+set device-group site01 pre-rulebase nat rules "default DIPP" source any
+set device-group site01 pre-rulebase nat rules "default DIPP" destination any
+set device-group site01 pre-rulebase nat rules "default DIPP" service any
+set device-group site01 pre-rulebase nat rules "default DIPP" to-interface ethernet1/1
+set device-group site01 pre-rulebase security rules "default allow" to any
+set device-group site01 pre-rulebase security rules "default allow" from any
+set device-group site01 pre-rulebase security rules "default allow" source any
+set device-group site01 pre-rulebase security rules "default allow" destination any
+set device-group site01 pre-rulebase security rules "default allow" source-user any
+set device-group site01 pre-rulebase security rules "default allow" category any
+set device-group site01 pre-rulebase security rules "default allow" application any
+set device-group site01 pre-rulebase security rules "default allow" service any
+set device-group site01 pre-rulebase security rules "default allow" source-hip any
+set device-group site01 pre-rulebase security rules "default allow" destination-hip any
+set device-group site01 pre-rulebase security rules "default allow" action allow
+set device-group site01 pre-rulebase security rules "default allow" log-start no
+set device-group site01 pre-rulebase security rules "default allow" log-end yes
+set device-group site01 pre-rulebase security rules "default deny" to any
+set device-group site01 pre-rulebase security rules "default deny" from any
+set device-group site01 pre-rulebase security rules "default deny" source any
+set device-group site01 pre-rulebase security rules "default deny" destination any
+set device-group site01 pre-rulebase security rules "default deny" source-user any
+set device-group site01 pre-rulebase security rules "default deny" category any
+set device-group site01 pre-rulebase security rules "default deny" application any
+set device-group site01 pre-rulebase security rules "default deny" service any
+set device-group site01 pre-rulebase security rules "default deny" source-hip any
+set device-group site01 pre-rulebase security rules "default deny" destination-hip any
+set device-group site01 pre-rulebase security rules "default deny" action deny
+set device-group site01 pre-rulebase security rules "default deny" log-start yes
+set device-group site01 pre-rulebase security rules "default deny" log-end no
+set device-group site01 post-rulebase default-security-rules rules intrazone-default action allow
+set device-group site01 post-rulebase default-security-rules rules intrazone-default log-start yes
+set device-group site01 post-rulebase default-security-rules rules intrazone-default log-end no
+set device-group site01 post-rulebase default-security-rules rules interzone-default action allow
+set device-group site01 post-rulebase default-security-rules rules interzone-default log-start yes
+set device-group site01 post-rulebase default-security-rules rules interzone-default log-end no
+set device-group site01 devices 007254000367539 vsys vsys1 
+set device-group site01 devices 007254000367630 
+set device-group site01 user-group-source master-device device 007254000367539
+set device-group site01 user-group-source master-device vsys vsys1
+set device-group site01 user-group-source master-device sync-group no
+set deviceconfig system ip-address 10.1.20.9
+set deviceconfig system netmask 255.255.255.0
+set deviceconfig system update-server updates.paloaltonetworks.com
+set deviceconfig system update-schedule threats recurring hourly at 10
+set deviceconfig system update-schedule threats recurring hourly action download-and-install
+set deviceconfig system update-schedule threats recurring threshold 8
+set deviceconfig system update-schedule threats recurring new-app-threshold 24
+set deviceconfig system update-schedule anti-virus recurring hourly at 5
+set deviceconfig system update-schedule anti-virus recurring hourly action download-and-install
+set deviceconfig system update-schedule anti-virus recurring threshold 8
+set deviceconfig system update-schedule wildfire recurring every-15-mins at 0
+set deviceconfig system update-schedule wildfire recurring every-15-mins action download-and-install
+set deviceconfig system timezone America/Phoenix
+set deviceconfig system service disable-telnet yes
+set deviceconfig system service disable-http yes
+set deviceconfig system device-telemetry device-health-performance yes
+set deviceconfig system device-telemetry product-usage yes
+set deviceconfig system device-telemetry threat-prevention yes
+set deviceconfig system device-telemetry region Americas
+set deviceconfig system hostname Panorama
+set deviceconfig system type static 
+set deviceconfig system default-gateway 10.1.20.1
+set deviceconfig system dns-setting servers primary 10.1.20.7
+set deviceconfig system dns-setting servers secondary 10.1.20.8
+set deviceconfig system login-banner "unauthorized access prohibited"
+set deviceconfig system ssl-tls-service-profile panorama_mgmt_tls
+set deviceconfig setting management storage-partition internal 
+set deviceconfig setting management hostname-type-in-syslog FQDN
+set deviceconfig setting management idle-timeout 480
+set template site01 settings default-vsys vsys1
+set template site01 config  vsys vsys1 zone outside network layer3 ethernet1/1
+set template site01 config  vsys vsys1 zone inside network layer3 ethernet1/2
+set template site01 config  vsys vsys1 zone inside enable-user-identification yes
+set template site01 config  vsys vsys1 zone vpn network layer3 tunnel.21
+set template site01 config  vsys vsys1 import network interface [ ethernet1/1 ethernet1/2 vlan loopback tunnel sdwan tunnel.21 ]
+set template site01 config  vsys vsys1 import network vlan 
+set template site01 config  vsys vsys1 import network virtual-router [ default VR1 ]
+set template site01 config  vsys vsys1 import network logical-router 
+set template site01 config  vsys vsys1 import network virtual-wire 
+set template site01 config  vsys vsys1 certificate 
+set template site01 config  vsys vsys1 ssl-tls-service-profile 
+set template site01 config  deviceconfig system type static 
+set template site01 config  deviceconfig system service disable-telnet yes
+set template site01 config  deviceconfig system service disable-http yes
+set template site01 config  deviceconfig system device-telemetry device-health-performance yes
+set template site01 config  deviceconfig system device-telemetry product-usage yes
+set template site01 config  deviceconfig system device-telemetry threat-prevention yes
+set template site01 config  deviceconfig system device-telemetry region Americas
+set template site01 config  deviceconfig system panorama local-panorama panorama-server panorama.shamrock.lab
+set template site01 config  deviceconfig system ssl-tls-service-profile "site01 mgmt"
+set template site01 config  deviceconfig setting config rematch yes
+set template site01 config  deviceconfig setting management hostname-type-in-syslog FQDN
+set template site01 config  deviceconfig setting auto-mac-detect yes
+set template site01 config  network interface ethernet ethernet1/1 layer3 ndp-proxy enabled no
+set template site01 config  network interface ethernet ethernet1/1 layer3 sdwan-link-settings upstream-nat enable no
+set template site01 config  network interface ethernet ethernet1/1 layer3 sdwan-link-settings upstream-nat static-ip 
+set template site01 config  network interface ethernet ethernet1/1 layer3 sdwan-link-settings enable no
+set template site01 config  network interface ethernet ethernet1/1 layer3 ip 100.64.1.2/29 
+set template site01 config  network interface ethernet ethernet1/1 layer3 lldp enable no
+set template site01 config  network interface ethernet ethernet1/1 layer3 interface-management-profile "ping profile"
+set template site01 config  network interface ethernet ethernet1/1 comment site01-pub-s1
+set template site01 config  network interface ethernet ethernet1/2 layer3 ndp-proxy enabled no
+set template site01 config  network interface ethernet ethernet1/2 layer3 sdwan-link-settings upstream-nat enable no
+set template site01 config  network interface ethernet ethernet1/2 layer3 sdwan-link-settings upstream-nat static-ip 
+set template site01 config  network interface ethernet ethernet1/2 layer3 sdwan-link-settings enable no
+set template site01 config  network interface ethernet ethernet1/2 layer3 ip 10.1.255.1/30 
+set template site01 config  network interface ethernet ethernet1/2 layer3 interface-management-profile "inside profile"
+set template site01 config  network interface ethernet ethernet1/2 layer3 lldp enable no
+set template site01 config  network interface ethernet ethernet1/2 comment site01-core-sw1
+set template site01 config  network interface tunnel units tunnel.21 ip 10.0.0.1/30 
+set template site01 config  network interface tunnel units tunnel.21 interface-management-profile "inside profile"
+set template site01 config  network interface tunnel units tunnel.21 comment "site02 tu1"
+set template site01 config  network profiles monitor-profile default interval 3
+set template site01 config  network profiles monitor-profile default threshold 5
+set template site01 config  network profiles monitor-profile default action wait-recover
+set template site01 config  network profiles interface-management-profile "ping profile" ping yes
+set template site01 config  network profiles interface-management-profile "inside profile" https yes
+set template site01 config  network profiles interface-management-profile "inside profile" http-ocsp yes
+set template site01 config  network profiles interface-management-profile "inside profile" ssh yes
+set template site01 config  network profiles interface-management-profile "inside profile" snmp yes
+set template site01 config  network profiles interface-management-profile "inside profile" userid-service yes
+set template site01 config  network profiles interface-management-profile "inside profile" userid-syslog-listener-ssl yes
+set template site01 config  network profiles interface-management-profile "inside profile" userid-syslog-listener-udp yes
+set template site01 config  network profiles interface-management-profile "inside profile" ping yes
+set template site01 config  network profiles interface-management-profile "inside profile" response-pages yes
+set template site01 config  network ike crypto-profiles ike-crypto-profiles default encryption [ aes-128-cbc 3des ]
+set template site01 config  network ike crypto-profiles ike-crypto-profiles default hash sha1
+set template site01 config  network ike crypto-profiles ike-crypto-profiles default dh-group group2
+set template site01 config  network ike crypto-profiles ike-crypto-profiles default lifetime hours 8
+set template site01 config  network ike crypto-profiles ike-crypto-profiles Suite-B-GCM-128 encryption aes-128-cbc
+set template site01 config  network ike crypto-profiles ike-crypto-profiles Suite-B-GCM-128 hash sha256
+set template site01 config  network ike crypto-profiles ike-crypto-profiles Suite-B-GCM-128 dh-group group19
+set template site01 config  network ike crypto-profiles ike-crypto-profiles Suite-B-GCM-128 lifetime hours 8
+set template site01 config  network ike crypto-profiles ike-crypto-profiles Suite-B-GCM-256 encryption aes-256-cbc
+set template site01 config  network ike crypto-profiles ike-crypto-profiles Suite-B-GCM-256 hash sha384
+set template site01 config  network ike crypto-profiles ike-crypto-profiles Suite-B-GCM-256 dh-group group20
+set template site01 config  network ike crypto-profiles ike-crypto-profiles Suite-B-GCM-256 lifetime hours 8
+set template site01 config  network ike crypto-profiles ipsec-crypto-profiles default esp encryption [ aes-128-cbc 3des ]
+set template site01 config  network ike crypto-profiles ipsec-crypto-profiles default esp authentication sha1
+set template site01 config  network ike crypto-profiles ipsec-crypto-profiles default dh-group group2
+set template site01 config  network ike crypto-profiles ipsec-crypto-profiles default lifetime hours 1
+set template site01 config  network ike crypto-profiles ipsec-crypto-profiles Suite-B-GCM-128 esp encryption aes-128-gcm
+set template site01 config  network ike crypto-profiles ipsec-crypto-profiles Suite-B-GCM-128 esp authentication none
+set template site01 config  network ike crypto-profiles ipsec-crypto-profiles Suite-B-GCM-128 dh-group group19
+set template site01 config  network ike crypto-profiles ipsec-crypto-profiles Suite-B-GCM-128 lifetime hours 1
+set template site01 config  network ike crypto-profiles ipsec-crypto-profiles Suite-B-GCM-256 esp encryption aes-256-gcm
+set template site01 config  network ike crypto-profiles ipsec-crypto-profiles Suite-B-GCM-256 esp authentication none
+set template site01 config  network ike crypto-profiles ipsec-crypto-profiles Suite-B-GCM-256 dh-group group20
+set template site01 config  network ike crypto-profiles ipsec-crypto-profiles Suite-B-GCM-256 lifetime hours 1
+set template site01 config  network ike crypto-profiles global-protect-app-crypto-profiles default encryption aes-256-gcm
+set template site01 config  network ike crypto-profiles global-protect-app-crypto-profiles default authentication sha1
+set template site01 config  network ike gateway site02-primary authentication pre-shared-key key -AQ==fEqNCco3Yq9h5ZUglD3CZJT4lBs=TPKw8W+5h+VtffslpLSTkQ==
+set template site01 config  network ike gateway site02-primary protocol ikev1 dpd enable yes
+set template site01 config  network ike gateway site02-primary protocol ikev2 dpd enable yes
+set template site01 config  network ike gateway site02-primary protocol ikev2 ike-crypto-profile Suite-B-GCM-256
+set template site01 config  network ike gateway site02-primary protocol version ikev2
+set template site01 config  network ike gateway site02-primary local-address ip 100.64.1.2/29
+set template site01 config  network ike gateway site02-primary local-address interface ethernet1/1
+set template site01 config  network ike gateway site02-primary protocol-common nat-traversal enable no
+set template site01 config  network ike gateway site02-primary protocol-common fragmentation enable no
+set template site01 config  network ike gateway site02-primary peer-address ip 100.64.1.10
+set template site01 config  network qos profile default class-bandwidth-type mbps class class1 priority real-time
+set template site01 config  network qos profile default class-bandwidth-type mbps class class2 priority high
+set template site01 config  network qos profile default class-bandwidth-type mbps class class3 priority high
+set template site01 config  network qos profile default class-bandwidth-type mbps class class4 priority medium
+set template site01 config  network qos profile default class-bandwidth-type mbps class class5 priority medium
+set template site01 config  network qos profile default class-bandwidth-type mbps class class6 priority low
+set template site01 config  network qos profile default class-bandwidth-type mbps class class7 priority low
+set template site01 config  network qos profile default class-bandwidth-type mbps class class8 priority low
+set template site01 config  network virtual-router default protocol bgp enable no
+set template site01 config  network virtual-router default protocol bgp dampening-profile default cutoff 1.25
+set template site01 config  network virtual-router default protocol bgp dampening-profile default reuse 0.5
+set template site01 config  network virtual-router default protocol bgp dampening-profile default max-hold-time 900
+set template site01 config  network virtual-router default protocol bgp dampening-profile default decay-half-life-reachable 300
+set template site01 config  network virtual-router default protocol bgp dampening-profile default decay-half-life-unreachable 900
+set template site01 config  network virtual-router default protocol bgp dampening-profile default enable yes
+set template site01 config  network virtual-router VR1 ecmp algorithm ip-modulo 
+set template site01 config  network virtual-router VR1 protocol bgp enable no
+set template site01 config  network virtual-router VR1 protocol bgp routing-options graceful-restart enable yes
+set template site01 config  network virtual-router VR1 protocol rip enable no
+set template site01 config  network virtual-router VR1 protocol ospf router-id 10.1.255.1
+set template site01 config  network virtual-router VR1 protocol ospf enable yes
+set template site01 config  network virtual-router VR1 protocol ospf area 0.0.0.0 type normal 
+set template site01 config  network virtual-router VR1 protocol ospf area 0.0.0.0 interface ethernet1/2 bfd profile Inherit-vr-global-setting
+set template site01 config  network virtual-router VR1 protocol ospf area 0.0.0.0 interface ethernet1/2 enable yes
+set template site01 config  network virtual-router VR1 protocol ospf area 0.0.0.0 interface ethernet1/2 passive no
+set template site01 config  network virtual-router VR1 protocol ospf area 0.0.0.0 interface ethernet1/2 gr-delay 10
+set template site01 config  network virtual-router VR1 protocol ospf area 0.0.0.0 interface ethernet1/2 metric 10
+set template site01 config  network virtual-router VR1 protocol ospf area 0.0.0.0 interface ethernet1/2 priority 1
+set template site01 config  network virtual-router VR1 protocol ospf area 0.0.0.0 interface ethernet1/2 hello-interval 10
+set template site01 config  network virtual-router VR1 protocol ospf area 0.0.0.0 interface ethernet1/2 dead-counts 4
+set template site01 config  network virtual-router VR1 protocol ospf area 0.0.0.0 interface ethernet1/2 retransmit-interval 5
+set template site01 config  network virtual-router VR1 protocol ospf area 0.0.0.0 interface ethernet1/2 transit-delay 1
+set template site01 config  network virtual-router VR1 protocol ospf area 0.0.0.0 interface ethernet1/2 link-type broadcast 
+set template site01 config  network virtual-router VR1 protocol ospf area 0.0.0.1 type normal 
+set template site01 config  network virtual-router VR1 protocol ospf area 0.0.0.1 interface tunnel.21 bfd profile Inherit-vr-global-setting
+set template site01 config  network virtual-router VR1 protocol ospf area 0.0.0.1 interface tunnel.21 enable yes
+set template site01 config  network virtual-router VR1 protocol ospf area 0.0.0.1 interface tunnel.21 passive no
+set template site01 config  network virtual-router VR1 protocol ospf area 0.0.0.1 interface tunnel.21 gr-delay 10
+set template site01 config  network virtual-router VR1 protocol ospf area 0.0.0.1 interface tunnel.21 metric 10
+set template site01 config  network virtual-router VR1 protocol ospf area 0.0.0.1 interface tunnel.21 priority 1
+set template site01 config  network virtual-router VR1 protocol ospf area 0.0.0.1 interface tunnel.21 hello-interval 10
+set template site01 config  network virtual-router VR1 protocol ospf area 0.0.0.1 interface tunnel.21 dead-counts 4
+set template site01 config  network virtual-router VR1 protocol ospf area 0.0.0.1 interface tunnel.21 retransmit-interval 5
+set template site01 config  network virtual-router VR1 protocol ospf area 0.0.0.1 interface tunnel.21 transit-delay 1
+set template site01 config  network virtual-router VR1 protocol ospf area 0.0.0.1 interface tunnel.21 link-type p2p 
+set template site01 config  network virtual-router VR1 protocol ospfv3 enable no
+set template site01 config  network virtual-router VR1 interface [ ethernet1/1 ethernet1/2 tunnel.21 ]
+set template site01 config  network virtual-router VR1 routing-table ip static-route "primary default" nexthop ip-address 100.64.1.1
+set template site01 config  network virtual-router VR1 routing-table ip static-route "primary default" bfd profile None
+set template site01 config  network virtual-router VR1 routing-table ip static-route "primary default" interface ethernet1/1
+set template site01 config  network virtual-router VR1 routing-table ip static-route "primary default" metric 10
+set template site01 config  network virtual-router VR1 routing-table ip static-route "primary default" destination 0.0.0.0/0
+set template site01 config  network virtual-router VR1 routing-table ip static-route "primary default" route-table unicast 
+set template site01 config  network tunnel ipsec site02-primary auto-key ike-gateway site02-primary 
+set template site01 config  network tunnel ipsec site02-primary auto-key ipsec-crypto-profile Suite-B-GCM-256
+set template site01 config  network tunnel ipsec site02-primary tunnel-monitor enable yes
+set template site01 config  network tunnel ipsec site02-primary tunnel-monitor destination-ip 10.0.0.2
+set template site01 config  network tunnel ipsec site02-primary tunnel-interface tunnel.21
+set template site01 config mgt-config users __openconfig phash $5$mybnmjxk$r.zcmRuEo0iIERni0zM8LYTDKB1yTmqFPKMIuUbabiC
+set template site01 config mgt-config users __openconfig permissions role-based deviceadmin localhost.localdomain
+set template site01 config mgt-config password-complexity enabled yes
+set template site01 config mgt-config password-complexity minimum-length 8
+set template site01 config shared certificate site01 subject-hash 4d83ff07
+set template site01 config shared certificate site01 issuer-hash 880a77ee
+set template site01 config shared certificate site01 not-valid-before "Jan 28 02:59:22 2025 GMT"
+set template site01 config shared certificate site01 issuer "DC = lab, DC = shamrock, CN = shamrock-lab-ca"
+set template site01 config shared certificate site01 not-valid-after "Jan 28 02:59:22 2027 GMT"
+set template site01 config shared certificate site01 common-name site01
+set template site01 config shared certificate site01 expiry-epoch 1801105162
+set template site01 config shared certificate site01 ca no
+set template site01 config shared certificate site01 subject "C = US, ST = AZ, O = Shamrock Lab, OU = Network, CN = site01"
+set template site01 config shared certificate site01 public-key "-----BEGIN CERTIFICATE-----
+MIIHsTCCBZmgAwIBAgITFQAAAAzG3uAruovxUAAAAAAADDANBgkqhkiG9w0BAQsF
+ADBJMRMwEQYKCZImiZPyLGQBGRYDbGFiMRgwFgYKCZImiZPyLGQBGRYIc2hhbXJv
+Y2sxGDAWBgNVBAMTD3NoYW1yb2NrLWxhYi1jYTAeFw0yNTAxMjgwMjU5MjJaFw0y
+NzAxMjgwMjU5MjJaMFQxCzAJBgNVBAYTAlVTMQswCQYDVQQIEwJBWjEVMBMGA1UE
+ChMMU2hhbXJvY2sgTGFiMRAwDgYDVQQLEwdOZXR3b3JrMQ8wDQYDVQQDEwZzaXRl
+MDEwggIiMA0GCSqGSIb3DQEBAQUAA4ICDwAwggIKAoICAQDYUcaLvsxWDPoqHdHp
+a9sGlWN4Pb4+nVsrTJC3ECstQXQ+LYRhMBXj0IC8hKhHXIe/a9MpFIkbnAGUap0O
+U41NzMZTg4kgoyZWEXgBGi4Wakaz17ks/fZ6pT/oITsDBCOIFmrTW97LiiQ6qTCr
+W6xcPeI8dye3i3/oUJmu+8Ddc7mrYVmII8qwMGmahbUo7m0VvYFnT+Uzl7/Yu9mc
+pp1ltIZBoRP2Dd99A7FNLzaFdo+Ojn7IdRFh6RwGpn+QlbQQ3zK47d5NnFa1i3gj
+9Yz0l4MrhQMaWLy4rC45B/qVzw5qDXtPtD/rnym4K+U7by2+dvxJ7wrNEv+3PRoQ
+1APYmSzXtZyIp3n3hUPyNSCU9/3sogXDfNxfi7akrkuPN5eP4A2QS4go2jia7hLA
+N1LNco/LNdU+TZuGTtFibAr3ckwbwECE+J1tXwFx5heg/SsCEKNSdsWQHFv0FMFf
+KDCta5sRHKq3ltg258fSdcsvEXNNgzDOnFXWq4s/5HGcBxq80wEM9f6SjVICgd1d
+TM1YEeTh/oJl0Ol+ywa93I4mMlURWokkrWByh/WuwlhmmVmmb8qw8Rdh861GbNUg
+CDxnlKKxf7cvPc0kfGHhj4MA8+wLqcJBkIjpVtyKmYe0hhpyJz72TRl5aw0yhqip
+axOATm0mTROH+o2+WoPGCEY32QIDAQABo4IChTCCAoEwZQYDVR0RBF4wXIIXc2l0
+ZTAxLWZ3MS5zaGFtcm9jay5sYWKCCnNpdGUwMS1mdzGCF3NpdGUwMS1mdzIuc2hh
+bXJvY2subGFiggpzaXRlMDEtZncyhwQKAVwFhwQKAVwGhwQKAf8BMB0GA1UdDgQW
+BBTACrTEptMkwdWVVeT/FFpMWwFs7DAfBgNVHSMEGDAWgBRVULBomdFHLShb1yuX
+1Nqj398ITTCBygYDVR0fBIHCMIG/MIG8oIG5oIG2hoGzbGRhcDovLy9DTj1zaGFt
+cm9jay1sYWItY2EsQ049ZGMyLENOPUNEUCxDTj1QdWJsaWMlMjBLZXklMjBTZXJ2
+aWNlcyxDTj1TZXJ2aWNlcyxDTj1Db25maWd1cmF0aW9uLERDPXNoYW1yb2NrLERD
+PWxhYj9jZXJ0aWZpY2F0ZVJldm9jYXRpb25MaXN0P2Jhc2U/b2JqZWN0Q2xhc3M9
+Y1JMRGlzdHJpYnV0aW9uUG9pbnQwgcIGCCsGAQUFBwEBBIG1MIGyMIGvBggrBgEF
+BQcwAoaBomxkYXA6Ly8vQ049c2hhbXJvY2stbGFiLWNhLENOPUFJQSxDTj1QdWJs
+aWMlMjBLZXklMjBTZXJ2aWNlcyxDTj1TZXJ2aWNlcyxDTj1Db25maWd1cmF0aW9u
+LERDPXNoYW1yb2NrLERDPWxhYj9jQUNlcnRpZmljYXRlP2Jhc2U/b2JqZWN0Q2xh
+c3M9Y2VydGlmaWNhdGlvbkF1dGhvcml0eTAhBgkrBgEEAYI3FAIEFB4SAFcAZQBi
+AFMAZQByAHYAZQByMA4GA1UdDwEB/wQEAwIFoDATBgNVHSUEDDAKBggrBgEFBQcD
+ATANBgkqhkiG9w0BAQsFAAOCAgEAIN9Y+euJKtRHiJxBbOBkMvzPCT8QgYivlqUw
+oXGSH/cMCkSWk9b2+P84itO39kJr9XnbpsyUCbU/ExjsnVB9tdqzR10Dibt1KOI/
+0RHD72iFBOHvlmhDJIL+RQhsFqQQVCS+WeqDw63AxZ6CzntXtC8t/iS/wLj6vywj
+37bqBCiTNYexL/kWGZrsHnKPFYmrrErk+uDxr6UaigNlmRIIK9/fP0jKQW8Tvf4d
+oS7VXA5IjOWZzWYHjkZINIxg2GR5LxzttIbF2scQSGsX5XZuRFf+ywInsB/AHzoI
+KcVLCh0W+R9BRMkVmSprsu7rDcvLk9kQYhEaFsGFzIq5KcF50n+14VpdYWw6z7L7
+dA1hgzYj4+jNVjFF6JqtKrV5QiU2TnfWXCZZeMUj0fSUguC0QnV+bhGqFE9qTYBJ
+Fl4yvLdqzETuGYizGXogzGlSR0iqqJ21Gxov982FQ2LQPpAKUYX51PlB4BJaihoL
+vqA29wlOM8708p/ORPILzRNVv2RZYQN1M8HuYegbKgid765F4Uc28bZM0HSHJlaV
+/+pvbYqpg58wYOaerxEkEM5+6kp69rIHIwrwvQI0lcYLKm1tpV48TUABHiUyBT5M
+pFsj21YIesO2SrYAkzswpR0papHv6OcD8U9IGILVgyoWZ+2gZq6i+CS9XikZLL0z
+v3xtpEk=
+-----END CERTIFICATE-----
+"
+set template site01 config shared certificate site01 algorithm RSA
+set template site01 config shared certificate site01 private-key -AQ==g1EV3WWkXx3uszavfNQMHEu0Rp8=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
+set template site01 config shared ssl-tls-service-profile "site01 mgmt" protocol-settings min-version tls1-2
+set template site01 config shared ssl-tls-service-profile "site01 mgmt" protocol-settings max-version max
+set template site01 config shared ssl-tls-service-profile "site01 mgmt" certificate site01
+set template baseline settings default-vsys vsys1
+set template baseline config  vsys vsys1 
+set template baseline config  deviceconfig system panorama local-panorama panorama-server panorama.shamrock.lab
+set template baseline config  deviceconfig system update-server updates.paloaltonetworks.com
+set template baseline config  deviceconfig system dns-setting servers primary 10.1.20.7
+set template baseline config  deviceconfig system dns-setting servers secondary 10.1.20.8
+set template baseline config  deviceconfig system ntp-servers primary-ntp-server ntp-server-address time.google.com
+set template baseline config  deviceconfig system update-schedule anti-virus recurring hourly at 3
+set template baseline config  deviceconfig system update-schedule anti-virus recurring hourly action download-and-install
+set template baseline config  deviceconfig system update-schedule anti-virus recurring threshold 8
+set template baseline config  deviceconfig system update-schedule threats recurring every-30-mins at 5
+set template baseline config  deviceconfig system update-schedule threats recurring every-30-mins action download-and-install
+set template baseline config  deviceconfig system update-schedule threats recurring threshold 8
+set template baseline config  deviceconfig system update-schedule threats recurring new-app-threshold 24
+set template baseline config  deviceconfig system update-schedule global-protect-clientless-vpn recurring weekly at 00:00
+set template baseline config  deviceconfig system update-schedule global-protect-clientless-vpn recurring weekly day-of-week sunday
+set template baseline config  deviceconfig system update-schedule global-protect-clientless-vpn recurring weekly action download-and-install
+set template baseline config  deviceconfig system update-schedule global-protect-datafile recurring weekly at 00:15
+set template baseline config  deviceconfig system update-schedule global-protect-datafile recurring weekly day-of-week sunday
+set template baseline config  deviceconfig system update-schedule global-protect-datafile recurring weekly action download-and-install
+set template baseline config  deviceconfig system update-schedule wildfire recurring every-15-mins at 0
+set template baseline config  deviceconfig system update-schedule wildfire recurring every-15-mins action download-and-install
+set template baseline config  deviceconfig system domain shamrock.lab
+set template baseline config  deviceconfig system login-banner "Do not proceed without authorization"
+set template baseline config  deviceconfig system timezone America/Phoenix
+set template baseline config  deviceconfig setting management idle-timeout 480
+set template baseline config  deviceconfig setting management auto-acquire-commit-lock yes
+set template baseline config mgt-config users admin permissions role-based superuser yes
+set template baseline config mgt-config users admin phash $5$ubtfsaoa$oR0EO6ZbrCH6dm0yFNxhGqqmnz24Peit1dlSSdEelh9
+set template baseline config mgt-config users lab permissions role-based superuser yes
+set template baseline config mgt-config users lab authentication-profile shamrock.lab-ldap
+set template baseline config shared certificate shamrock-lab-ca subject-hash 880a77ee
+set template baseline config shared certificate shamrock-lab-ca issuer-hash 880a77ee
+set template baseline config shared certificate shamrock-lab-ca not-valid-before "Jan 28 01:13:21 2025 GMT"
+set template baseline config shared certificate shamrock-lab-ca issuer "DC = lab, DC = shamrock, CN = shamrock-lab-ca"
+set template baseline config shared certificate shamrock-lab-ca not-valid-after "Jan 28 01:23:19 2035 GMT"
+set template baseline config shared certificate shamrock-lab-ca common-name shamrock-lab-ca
+set template baseline config shared certificate shamrock-lab-ca expiry-epoch 2053560199
+set template baseline config shared certificate shamrock-lab-ca ca yes
+set template baseline config shared certificate shamrock-lab-ca subject "DC = lab, DC = shamrock, CN = shamrock-lab-ca"
+set template baseline config shared certificate shamrock-lab-ca public-key "-----BEGIN CERTIFICATE-----
+MIIFbTCCA1WgAwIBAgIQPRlrpxgFv7pPmppDuYxm9DANBgkqhkiG9w0BAQsFADBJ
+MRMwEQYKCZImiZPyLGQBGRYDbGFiMRgwFgYKCZImiZPyLGQBGRYIc2hhbXJvY2sx
+GDAWBgNVBAMTD3NoYW1yb2NrLWxhYi1jYTAeFw0yNTAxMjgwMTEzMjFaFw0zNTAx
+MjgwMTIzMTlaMEkxEzARBgoJkiaJk/IsZAEZFgNsYWIxGDAWBgoJkiaJk/IsZAEZ
+FghzaGFtcm9jazEYMBYGA1UEAxMPc2hhbXJvY2stbGFiLWNhMIICIjANBgkqhkiG
+9w0BAQEFAAOCAg8AMIICCgKCAgEAmaPAVvE56uQiASQjn/PUXcPVYGTXcD6jdoX8
+GyuWvjrt64zs0zjW4nNLN1XLoCbu6ywXpXk9fIkz0bwSto4CKq2QSt/5Ki8xsqD9
+xDzlgvAb9JOuiboYdcZ1U/xmtK3WUHHb80kaHi5ph/a5eB009dqFXWVX6rIKmS7H
+6uN6WVsOWN2Sovob87mtGuDHO+dbEVpd//iEFBHPJ2E0ibXGM6OzFZtHKT0/02hp
+xGi4OUt8HHJ1YDa5gOt/Hjvqxih7YFO9zDrVPkrDJGCyPO/GTi/zpXKWPI9IUTcG
+szLlGfaW/mREpk7mlTT5cddyyxyZpSjBKrF3caHZ49+Dszb3TvVHyjhrPwi9rbNY
+u7xM9AdvbqfpNE9Spgn5AbwS3XXekdKBVCv3hx/nd0O9on8ajOiFcsaoU/DeSDQP
+7ibbalWzR2CoYgQ0pXgKI7yFjvRqc1u9eBlSoDYftbrdsSZ/NwbTfvlFHZcnKRGo
+vN5p2n8A0dSsxjMAYnhRx50jNdYRhTlMJmKNds030rfcfzVQWCjMHPEs6h9+sZOA
+dEfNKrWdy15rWC+0/7a4yOv4Uqe0RF1azhRLEoul9NaBGhOpWkqDgBUQbKPBU2Xc
+hPWZ0SinKQLineTWclgk3F4WzLDFktbFYTJHJjIg08NAoxhl0KuZ3eDABhyhpNeS
+xAUB6jECAwEAAaNRME8wCwYDVR0PBAQDAgGGMA8GA1UdEwEB/wQFMAMBAf8wHQYD
+VR0OBBYEFFVQsGiZ0UctKFvXK5fU2qPf3whNMBAGCSsGAQQBgjcVAQQDAgEAMA0G
+CSqGSIb3DQEBCwUAA4ICAQB+YUR3e0e72I6+Xg0rzst7KIlPHvLpcXWc+HsXbuzZ
+S8dUuTntjpfGI4e+YCCOuFpu69P93nxFBGUuuzsXK9LmEWoV9oIpffGmsn0Iodak
+MAsHEuupWpb6sPEowECZpA1NVwvhDyr7WijgyGpCX3864yCNbeIsaT+ae/5rmX0M
+idFuF86Nf1Hcm9BYeNVv2o3M8bgBwH9JtOQLYRDw4Xw8NcwUA21ljojRygWWVQQ3
+74QkQVKih+tTnB62Nh247tprMgfAnMW1UwAhjgGgAaPoXQvxlUVmwF1Ia5wzBZl9
+V40Ng/lgQj89IbW54uOtcD+YK0kHk9J5CVkWOrtzQUqKQIJZk4HHrQcyXHXThYTH
+TJ8oifjNdyBSnrKR15+mxvdVJEo6Nl+plfUofKxV5xLZa0lhgNFUg0x8FS9HkV0J
++KdwqW08jHbUtoQ8p2fSOjzeCtNUq55R1uoRzA/waEH5t4nFClSZFpk28m488W6Z
+oMxYi3rokgIQMbzYgVoqJ7za6sHpiw8+Spe4gj7G8flDgRStb0S+YmgOeWu19cz1
+qhLaZXwiKgjdBl/PKlxpkJA19lyu2Kg1ZWpQXykM9GLsB6FN3uGTUizs3nlTxFh4
+rSB4l8pletXz2CT51HLiDIGVThWz72n/mnoEmH/Xc6QUGrkeNYkj2NekXxLVUpu0
+CA==
+-----END CERTIFICATE-----
+"
+set template baseline config shared certificate shamrock-lab-ca algorithm RSA
+set template baseline config shared server-profile ldap shamrock.lab-ad-389 server dc1 address 10.1.20.7
+set template baseline config shared server-profile ldap shamrock.lab-ad-389 server dc1 port 389
+set template baseline config shared server-profile ldap shamrock.lab-ad-389 server dc2 address 10.1.20.8
+set template baseline config shared server-profile ldap shamrock.lab-ad-389 server dc2 port 389
+set template baseline config shared server-profile ldap shamrock.lab-ad-389 ldap-type active-directory
+set template baseline config shared server-profile ldap shamrock.lab-ad-389 bind-dn CN=svc_ldap,OU=service_accounts,DC=shamrock,DC=lab
+set template baseline config shared server-profile ldap shamrock.lab-ad-389 bind-password -AQ==E3IBJ3pufeRKdFuAd+xxaAuM7Qk=PM8yGuEXJhllaJ1xZ2pFaQ==
+set template baseline config shared server-profile ldap shamrock.lab-ad-389 ssl yes
+set template baseline config shared server-profile ldap shamrock.lab-ad-389 base DC=shamrock,DC=lab
+set template baseline config shared authentication-profile shamrock.lab-ldap method ldap server-profile shamrock.lab-ad-389
+set template baseline config shared authentication-profile shamrock.lab-ldap multi-factor-auth mfa-enable no
+set template baseline config shared authentication-profile shamrock.lab-ldap allow-list all
+set template baseline config shared authentication-profile shamrock.lab-ldap lockout lockout-time 10
+set template baseline config shared authentication-profile shamrock.lab-ldap lockout failed-attempts 5
+set template baseline config shared authentication-profile shamrock.lab-ldap user-domain shamrock.lab
+set template-stack site01_stack settings default-vsys vsys1
+set template-stack site01_stack templates [ site01 baseline ]
+set template-stack site01_stack devices 007254000367539 
+set template-stack site01_stack devices 007254000367630 
+set template-stack site01_stack user-group-source master-device device 007254000367539
+set mgt-config devices 007254000367539 
+set mgt-config devices 007254000367630 
+set mgt-config users admin phash $5$mxwewssa$R9JlQbKFGvdCvRzOe6kPId4tTMFWlmnXeHv5qG.jUo0
+set mgt-config users admin permissions role-based superuser yes
+set mgt-config users __vm_series phash $5$uabdidhp$6/8HWbX6TrGSpM1xzx5pi5YaMlXJG4I1P4pAULp.7ZD
+set mgt-config users __vm_series permissions role-based panorama-admin yes
+set mgt-config users lab permissions role-based superuser yes
+set mgt-config users lab authentication-profile shamrock.lab-ldap
+set mgt-config password-complexity enabled yes
+set mgt-config password-complexity minimum-length 8
+set panorama certificate shamrock-lab-ca subject-hash 880a77ee
+set panorama certificate shamrock-lab-ca issuer-hash 880a77ee
+set panorama certificate shamrock-lab-ca not-valid-before "Jan 28 01:13:21 2025 GMT"
+set panorama certificate shamrock-lab-ca issuer "DC = lab, DC = shamrock, CN = shamrock-lab-ca"
+set panorama certificate shamrock-lab-ca not-valid-after "Jan 28 01:23:19 2035 GMT"
+set panorama certificate shamrock-lab-ca common-name shamrock-lab-ca
+set panorama certificate shamrock-lab-ca expiry-epoch 2053560199
+set panorama certificate shamrock-lab-ca ca yes
+set panorama certificate shamrock-lab-ca subject "DC = lab, DC = shamrock, CN = shamrock-lab-ca"
+set panorama certificate shamrock-lab-ca public-key "-----BEGIN CERTIFICATE-----
+MIIFbTCCA1WgAwIBAgIQPRlrpxgFv7pPmppDuYxm9DANBgkqhkiG9w0BAQsFADBJ
+MRMwEQYKCZImiZPyLGQBGRYDbGFiMRgwFgYKCZImiZPyLGQBGRYIc2hhbXJvY2sx
+GDAWBgNVBAMTD3NoYW1yb2NrLWxhYi1jYTAeFw0yNTAxMjgwMTEzMjFaFw0zNTAx
+MjgwMTIzMTlaMEkxEzARBgoJkiaJk/IsZAEZFgNsYWIxGDAWBgoJkiaJk/IsZAEZ
+FghzaGFtcm9jazEYMBYGA1UEAxMPc2hhbXJvY2stbGFiLWNhMIICIjANBgkqhkiG
+9w0BAQEFAAOCAg8AMIICCgKCAgEAmaPAVvE56uQiASQjn/PUXcPVYGTXcD6jdoX8
+GyuWvjrt64zs0zjW4nNLN1XLoCbu6ywXpXk9fIkz0bwSto4CKq2QSt/5Ki8xsqD9
+xDzlgvAb9JOuiboYdcZ1U/xmtK3WUHHb80kaHi5ph/a5eB009dqFXWVX6rIKmS7H
+6uN6WVsOWN2Sovob87mtGuDHO+dbEVpd//iEFBHPJ2E0ibXGM6OzFZtHKT0/02hp
+xGi4OUt8HHJ1YDa5gOt/Hjvqxih7YFO9zDrVPkrDJGCyPO/GTi/zpXKWPI9IUTcG
+szLlGfaW/mREpk7mlTT5cddyyxyZpSjBKrF3caHZ49+Dszb3TvVHyjhrPwi9rbNY
+u7xM9AdvbqfpNE9Spgn5AbwS3XXekdKBVCv3hx/nd0O9on8ajOiFcsaoU/DeSDQP
+7ibbalWzR2CoYgQ0pXgKI7yFjvRqc1u9eBlSoDYftbrdsSZ/NwbTfvlFHZcnKRGo
+vN5p2n8A0dSsxjMAYnhRx50jNdYRhTlMJmKNds030rfcfzVQWCjMHPEs6h9+sZOA
+dEfNKrWdy15rWC+0/7a4yOv4Uqe0RF1azhRLEoul9NaBGhOpWkqDgBUQbKPBU2Xc
+hPWZ0SinKQLineTWclgk3F4WzLDFktbFYTJHJjIg08NAoxhl0KuZ3eDABhyhpNeS
+xAUB6jECAwEAAaNRME8wCwYDVR0PBAQDAgGGMA8GA1UdEwEB/wQFMAMBAf8wHQYD
+VR0OBBYEFFVQsGiZ0UctKFvXK5fU2qPf3whNMBAGCSsGAQQBgjcVAQQDAgEAMA0G
+CSqGSIb3DQEBCwUAA4ICAQB+YUR3e0e72I6+Xg0rzst7KIlPHvLpcXWc+HsXbuzZ
+S8dUuTntjpfGI4e+YCCOuFpu69P93nxFBGUuuzsXK9LmEWoV9oIpffGmsn0Iodak
+MAsHEuupWpb6sPEowECZpA1NVwvhDyr7WijgyGpCX3864yCNbeIsaT+ae/5rmX0M
+idFuF86Nf1Hcm9BYeNVv2o3M8bgBwH9JtOQLYRDw4Xw8NcwUA21ljojRygWWVQQ3
+74QkQVKih+tTnB62Nh247tprMgfAnMW1UwAhjgGgAaPoXQvxlUVmwF1Ia5wzBZl9
+V40Ng/lgQj89IbW54uOtcD+YK0kHk9J5CVkWOrtzQUqKQIJZk4HHrQcyXHXThYTH
+TJ8oifjNdyBSnrKR15+mxvdVJEo6Nl+plfUofKxV5xLZa0lhgNFUg0x8FS9HkV0J
++KdwqW08jHbUtoQ8p2fSOjzeCtNUq55R1uoRzA/waEH5t4nFClSZFpk28m488W6Z
+oMxYi3rokgIQMbzYgVoqJ7za6sHpiw8+Spe4gj7G8flDgRStb0S+YmgOeWu19cz1
+qhLaZXwiKgjdBl/PKlxpkJA19lyu2Kg1ZWpQXykM9GLsB6FN3uGTUizs3nlTxFh4
+rSB4l8pletXz2CT51HLiDIGVThWz72n/mnoEmH/Xc6QUGrkeNYkj2NekXxLVUpu0
+CA==
+-----END CERTIFICATE-----
+"
+set panorama certificate shamrock-lab-ca algorithm RSA
+set panorama certificate "panorama tls" common-name panorama.shamrock.lab
+set panorama certificate "panorama tls" subject "C = US, ST = AZ, O = Shamrock Lab, CN = panorama.shamrock.lab"
+set panorama certificate "panorama tls" algorithm RSA
+set panorama certificate "panorama tls" private-key -AQ==kuQhknLCl0udqOUJGdxq80pbnIk=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
+set panorama certificate "panorama tls" subject-hash b8056bd4
+set panorama certificate "panorama tls" issuer-hash 880a77ee
+set panorama certificate "panorama tls" not-valid-before "Jan 28 02:38:01 2025 GMT"
+set panorama certificate "panorama tls" issuer "DC = lab, DC = shamrock, CN = shamrock-lab-ca"
+set panorama certificate "panorama tls" not-valid-after "Jan 28 02:38:01 2027 GMT"
+set panorama certificate "panorama tls" expiry-epoch 1801103881
+set panorama certificate "panorama tls" ca no
+set panorama certificate "panorama tls" public-key "-----BEGIN CERTIFICATE-----
+MIIHbzCCBVegAwIBAgITFQAAAAukOPa8a495ewAAAAAACzANBgkqhkiG9w0BAQsF
+ADBJMRMwEQYKCZImiZPyLGQBGRYDbGFiMRgwFgYKCZImiZPyLGQBGRYIc2hhbXJv
+Y2sxGDAWBgNVBAMTD3NoYW1yb2NrLWxhYi1jYTAeFw0yNTAxMjgwMjM4MDFaFw0y
+NzAxMjgwMjM4MDFaMFExCzAJBgNVBAYTAlVTMQswCQYDVQQIEwJBWjEVMBMGA1UE
+ChMMU2hhbXJvY2sgTGFiMR4wHAYDVQQDExVwYW5vcmFtYS5zaGFtcm9jay5sYWIw
+ggIiMA0GCSqGSIb3DQEBAQUAA4ICDwAwggIKAoICAQDs05UoqWSR844ZmiDxWntb
+LZzwL7dXxLTJ9o/Rh+wb6vv2M8kre090E5Yfbo8XW2mazRKHNv8oMIn29LbItjd8
+vl5WxfjvZxCoZqmQ7pnk6+ihPtlGqWSnXDvn7xvwjwsQ16OWkJOsYRvzGfm9BEc4
+0Ow4ggAvOFwTkJE4jusae/2oe+qalL28YYt/yKGy8Ujd7Fo1twKB5MVYBmCX5IvA
+y+F97bYJUgye63fLWzcTmnCL+3wV7iWlxGGX+OVVCoee2lHaNqqWVShujNCc+Z6K
+J9iiV/ZfgGugXOiVKQtjm3kwzrT1XPqxxNoaOIVs5RWhf18Hr896RWWGB+PSFZYM
+gV2q4I05TI1IUUZXtpX/3hsImDr6m9TlU2h4EUTZTyIrZTMfhGjLYHvjMOLHg86q
+VZPS0LjFxvljSIYSyil9e8WvdC/LfrNaoMP0ZFwpsXt7EVf1pP7XHugfZZvJKIYX
+7Zzx5Y1TmfTIvRP+86w71BFYi5/SJA+T3LjJZcRw1svrX+L5WLfw0c2j9BwTm+Wt
+6pGbDLEFzkEQIpf/tcQaXL4j0a84+zBQv3Ed1/uyv8I1yjTKRnlzLFb1N/Klr6c0
+EpT2+8+fzJzqMQBwp6cE4bMu98XR29PKsMuAW6fpnQ+DTQp9DiUr3EXIfVPXHj3U
+GE2d/fpgNM/W1wm7ps3sdwIDAQABo4ICRjCCAkIwJgYDVR0RBB8wHYIVcGFub3Jh
+bWEuc2hhbXJvY2subGFihwQKARQJMB0GA1UdDgQWBBT7Azb5fuSG66nJKI+EgtoY
+1cu7DjAfBgNVHSMEGDAWgBRVULBomdFHLShb1yuX1Nqj398ITTCBygYDVR0fBIHC
+MIG/MIG8oIG5oIG2hoGzbGRhcDovLy9DTj1zaGFtcm9jay1sYWItY2EsQ049ZGMy
+LENOPUNEUCxDTj1QdWJsaWMlMjBLZXklMjBTZXJ2aWNlcyxDTj1TZXJ2aWNlcyxD
+Tj1Db25maWd1cmF0aW9uLERDPXNoYW1yb2NrLERDPWxhYj9jZXJ0aWZpY2F0ZVJl
+dm9jYXRpb25MaXN0P2Jhc2U/b2JqZWN0Q2xhc3M9Y1JMRGlzdHJpYnV0aW9uUG9p
+bnQwgcIGCCsGAQUFBwEBBIG1MIGyMIGvBggrBgEFBQcwAoaBomxkYXA6Ly8vQ049
+c2hhbXJvY2stbGFiLWNhLENOPUFJQSxDTj1QdWJsaWMlMjBLZXklMjBTZXJ2aWNl
+cyxDTj1TZXJ2aWNlcyxDTj1Db25maWd1cmF0aW9uLERDPXNoYW1yb2NrLERDPWxh
+Yj9jQUNlcnRpZmljYXRlP2Jhc2U/b2JqZWN0Q2xhc3M9Y2VydGlmaWNhdGlvbkF1
+dGhvcml0eTAhBgkrBgEEAYI3FAIEFB4SAFcAZQBiAFMAZQByAHYAZQByMA4GA1Ud
+DwEB/wQEAwIFoDATBgNVHSUEDDAKBggrBgEFBQcDATANBgkqhkiG9w0BAQsFAAOC
+AgEAL89NpyYXiGREFMjyVmZw9trzsDtCSLndGC2xh6wLcLqBuRBYj5sXjKsh896c
+ltpR+uRkY0wrNIiTdYNTdTvcr5NSzUr8b8MYtGG/Uu0ZIpFWCn3hYYfyim3qfxex
+9v1QXFQgyFx/lIZSPYhh4RsY1SS9afNjb9IgnjD8wFashxhIwvQabMR+bZq2j56j
+UKEGBPk8r+yiZdx/1Z31gj0LLy89GG8qZNc2bpEqV47UCr/O7BuQzOggMxc46QA4
+ZcEzGKOqantFiiFGnyjwmCKwrmCME5lEgpD/O/C0BTG6RomY7EU45H1ZEOQzLTWw
+CiEYG+zDHTJ++742LgS+WgzOloH8YbEf6+i6ChGFReG0GeqK27TOTMkLiGSIA9gt
+jRWYAGhodm9Sz9fRO3ma40e8o9H90AckT+7FUXzF23sOgIvFpPiR6ef/NeYc99Zt
+6znTVZDSkbN8qdKbvae0QaJuzhY1PmEUq3PPtq1quDT69cEQoLObv9c9euiNRYTq
+3e05v9zxUm9uER6H2psaypSCAFz4ku0EchMGXdvIuQzIOoWntbhP8OjevkpTtjZa
+BesJLAZCBqHyedNZU0EUJO73fCtISC7HOfP3RJMPlc3VMCD2YXsgxrgR3Upc59wa
+iabp+eKuO8CaDMPFtCKiMbmD0zafaJ/6oQyBSvQS2FtSW+U=
+-----END CERTIFICATE-----
+"
+set panorama ssl-decrypt trusted-root-CA shamrock-lab-ca
+set panorama ssl-tls-service-profile panorama_mgmt_tls protocol-settings min-version tls1-2
+set panorama ssl-tls-service-profile panorama_mgmt_tls protocol-settings max-version max
+set panorama ssl-tls-service-profile panorama_mgmt_tls certificate "panorama tls"
+set panorama server-profile ldap shamrock.lab-ad-389 server dc1 address 10.1.20.7
+set panorama server-profile ldap shamrock.lab-ad-389 server dc1 port 389
+set panorama server-profile ldap shamrock.lab-ad-389 server dc2 address 10.1.20.8
+set panorama server-profile ldap shamrock.lab-ad-389 server dc2 port 389
+set panorama server-profile ldap shamrock.lab-ad-389 ldap-type active-directory
+set panorama server-profile ldap shamrock.lab-ad-389 bind-dn CN=svc_ldap,OU=service_accounts,DC=shamrock,DC=lab
+set panorama server-profile ldap shamrock.lab-ad-389 bind-password -AQ==E3IBJ3pufeRKdFuAd+xxaAuM7Qk=PM8yGuEXJhllaJ1xZ2pFaQ==
+set panorama server-profile ldap shamrock.lab-ad-389 ssl yes
+set panorama server-profile ldap shamrock.lab-ad-389 base DC=shamrock,DC=lab
+set panorama authentication-profile shamrock.lab-ldap method ldap server-profile shamrock.lab-ad-389
+set panorama authentication-profile shamrock.lab-ldap allow-list all
+set panorama authentication-profile shamrock.lab-ldap lockout lockout-time 10
+set panorama authentication-profile shamrock.lab-ldap lockout failed-attempts 5
+set panorama authentication-profile shamrock.lab-ldap user-domain shamrock.lab
+set readonly  device-group sites id 11
+set readonly  device-group site01 id 12
+set readonly  device-group site01 parent-dg sites
+set readonly  template site01 id 13
+set readonly  template site01 config devices localhost.localdomain vsys vsys1 zone outside id 14
+set readonly  template site01 config devices localhost.localdomain vsys vsys1 zone inside id 15
+set readonly  template site01 config devices localhost.localdomain vsys vsys1 zone vpn id 18
+set readonly  template baseline id 17
+set readonly  template-stack site01_stack id 16
+set readonly max-internal-id 18
+set shared application 
+set shared application-group sanctioned_apps members [ sanctioned_software_update sanctioned_internet_utility sanctioned_general_business ]
+set shared service 
+set shared service-group 
+set shared schedule 
+set shared application-filter sanctioned_software_update disable-override no
+set shared application-filter sanctioned_software_update category business-systems
+set shared application-filter sanctioned_software_update subcategory software-update
+set shared application-filter sanctioned_software_update risk [ 1 2 ]
+set shared application-filter sanctioned_internet_utility disable-override no
+set shared application-filter sanctioned_internet_utility category general-internet
+set shared application-filter sanctioned_internet_utility subcategory internet-utility
+set shared application-filter sanctioned_internet_utility risk [ 1 2 ]
+set shared application-filter sanctioned_general_business disable-override no
+set shared application-filter sanctioned_general_business category business-systems
+set shared application-filter sanctioned_general_business subcategory general-business
+set shared application-filter sanctioned_general_business risk [ 1 2 ]
+set shared tag outside color color19
+[edit]                                                                                                                            
