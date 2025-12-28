@@ -1,0 +1,199 @@
+Current configuration : 3223 bytes
+!
+! Last configuration change at 14:55:33 MST Tue Dec 23 2025 by lab
+!
+version 15.2
+service timestamps debug datetime msec localtime show-timezone year
+service timestamps log datetime msec localtime show-timezone year
+no service password-encryption
+service compress-config
+!
+hostname core-sw1
+!
+boot-start-marker
+boot-end-marker
+!
+!
+logging buffered 32768
+enable password cisco
+!
+username lab privilege 15 password 0 lab
+username cisco privilege 15 password 0 cisco
+no aaa new-model
+clock timezone MST -7 0
+!
+!
+!
+!
+!
+vtp mode off
+!
+ip vrf management
+!
+!
+!
+ip domain-name shamrock.lab
+ip name-server 208.67.222.222
+ip cef
+login on-failure log
+login on-success log
+no ipv6 cef
+!
+!
+!
+spanning-tree mode pvst
+spanning-tree extend system-id
+!
+!
+vlan 2
+ name management
+!
+vlan 10
+ name workstations
+!
+vlan 20
+ name servers
+!
+! 
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+interface Ethernet0/0
+ description FW-1 eth1/2
+ switchport access vlan 2
+ switchport mode access
+ spanning-tree bpduguard enable
+!
+interface Ethernet0/1
+ description FW-1 mgmt
+ switchport access vlan 2
+ switchport mode access
+ spanning-tree portfast edge
+!
+interface Ethernet0/2
+ description server1
+ switchport access vlan 20
+ switchport mode access
+ spanning-tree portfast edge
+!
+interface Ethernet0/3
+ description DC1
+ switchport access vlan 20
+ switchport mode access
+ spanning-tree portfast edge
+!
+interface Ethernet1/0
+ description Win1
+ switchport access vlan 10
+ switchport mode access
+ spanning-tree portfast edge
+!
+interface Ethernet1/1
+ description Panorama
+ switchport access vlan 20
+ switchport mode access
+ spanning-tree portfast edge
+!
+interface Ethernet1/2
+ description Docker
+ switchport access vlan 20
+ switchport mode access
+ spanning-tree portfast edge
+!
+interface Ethernet1/3
+ description Linux1
+ switchport access vlan 20
+ switchport mode access
+ spanning-tree portfast edge
+!
+interface Ethernet2/0
+ switchport access vlan 10
+ switchport mode access
+ spanning-tree portfast edge
+!
+interface Ethernet2/1
+!
+interface Ethernet2/2
+!
+interface Ethernet2/3
+!
+interface Ethernet3/0
+!
+interface Ethernet3/1
+!
+interface Ethernet3/2
+!
+interface Ethernet3/3
+!
+interface Vlan2
+ description management
+ ip address 10.0.2.1 255.255.255.0
+ no ip redirects
+ ip ospf 1 area 0.0.0.0
+!
+interface Vlan10
+ description workstations
+ ip address 10.0.10.1 255.255.255.0
+ ip helper-address 10.0.20.10 
+ no ip redirects
+ ip ospf 1 area 0.0.0.0
+!
+interface Vlan20
+ description servers
+ ip address 10.0.20.1 255.255.255.0
+ ip helper-address 10.0.20.10 
+ no ip redirects
+ ip ospf 1 area 0.0.0.0
+!
+router ospf 1
+ router-id 10.0.2.1
+ passive-interface default
+ no passive-interface Vlan2
+!
+ip forward-protocol nd
+!
+no ip http server
+no ip http secure-server
+!
+ip route 0.0.0.0 0.0.0.0 10.1.2.10 254
+ip ssh version 2
+ip ssh server algorithm encryption aes128-ctr aes192-ctr aes256-ctr
+ip ssh client algorithm encryption aes128-ctr aes192-ctr aes256-ctr
+!
+!
+!
+!
+!
+control-plane
+!
+!
+line con 0
+ session-timeout 30 
+ exec-timeout 0 0
+ privilege level 15
+ logging synchronous
+ login local
+line aux 0
+ exec-timeout 0 0
+ privilege level 15
+ logging synchronous
+line vty 0 4
+ exec-timeout 720 0
+ logging synchronous
+ login local
+ transport preferred none
+ transport input telnet ssh
+!
+!
+!
+end
+
