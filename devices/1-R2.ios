@@ -1,14 +1,13 @@
-Current configuration : 3098 bytes
+Current configuration : 3220 bytes
 !
-! Last configuration change at 09:59:01 MST Sun Dec 15 2024
+! Last configuration change at 13:58:02 MST Wed Dec 24 2025 by lab
 !
 version 15.7
-service config
 service timestamps debug datetime msec localtime show-timezone year
 service timestamps log datetime msec localtime show-timezone year
 no service password-encryption
 !
-hostname ISP1
+hostname R2
 !
 boot-start-marker
 boot-end-marker
@@ -72,7 +71,7 @@ username cisco privilege 15 password 0 cisco
 redundancy
 !
 !
-! 
+!
 !
 !
 !
@@ -86,36 +85,27 @@ redundancy
 !
 !
 interface Ethernet0/0
- description PA-410
- ip address 10.0.1.21 255.255.255.0
- ip nat outside
- ip virtual-reassembly in
+ description inet e0/0
+ ip address 100.64.12.1 255.255.255.0
  duplex auto
 !
 interface Ethernet0/1
- description pub-s1
- ip address 100.64.1.1 255.255.255.248
- ip nat inside
- ip virtual-reassembly in
+ description R4 e0/0
+ ip address 100.64.24.1 255.255.255.0
  duplex auto
 !
 interface Ethernet0/2
- description site02-pub-sw1
- ip address 100.64.1.9 255.255.255.248
- ip nat inside
- ip virtual-reassembly in
+ description R5 e0/0
+ ip address 100.64.25.1 255.255.255.0
  duplex auto
 !
 interface Ethernet0/3
- description site03-pub-s1 e0/0
- ip address 100.64.1.17 255.255.255.248
- ip nat inside
- ip virtual-reassembly in
+ no ip address
+ shutdown
  duplex auto
 !
 interface Ethernet1/0
  no ip address
- shutdown
  duplex auto
 !
 interface Ethernet1/1
@@ -169,30 +159,38 @@ interface Ethernet3/2
  duplex auto
 !
 interface Ethernet3/3
- description mgmt-cloud9
- ip address 172.31.255.3 255.255.255.0
- ip nat inside
- ip virtual-reassembly in
+ ip address 100.64.255.1 255.255.255.0
  duplex auto
+!
+router bgp 65002
+ bgp router-id 100.64.12.1
+ bgp log-neighbor-changes
+ network 100.64.12.0 mask 255.255.255.0
+ aggregate-address 100.64.0.0 255.255.0.0
+ neighbor 100.64.12.16 remote-as 65001
+ neighbor 100.64.12.16 soft-reconfiguration inbound
+ neighbor 100.64.12.16 prefix-list ALL-ROUTES out
+ neighbor 100.64.24.2 remote-as 64512
+ neighbor 100.64.24.2 soft-reconfiguration inbound
+ neighbor 100.64.24.2 prefix-list DEFAULT-ONLY out
+ neighbor 100.64.25.18 remote-as 64513
+ neighbor 100.64.25.18 soft-reconfiguration inbound
+ neighbor 100.64.25.18 prefix-list DEFAULT-ONLY out
 !
 ip forward-protocol nd
 !
 !
 no ip http server
 no ip http secure-server
-ip nat inside source list 1 interface Ethernet0/0 overload
-ip route 0.0.0.0 0.0.0.0 10.0.1.1 250
-ip ssh version 2
+ip route 100.64.0.1 255.255.255.255 100.64.12.16 250
 !
+!
+ip prefix-list ALL-ROUTES seq 10 permit 0.0.0.0/0 le 32
+!
+ip prefix-list DEFAULT-ONLY seq 10 permit 0.0.0.0/0
 ipv6 ioam timestamp
 !
-snmp-server community sfc.read RO
-snmp-server ifindex persist
-snmp-server location site01
-snmp-server chassis-id ISP1
 !
-access-list 1 permit 100.64.0.0 0.3.255.255
-access-list 1 permit 172.31.255.0 0.0.0.255
 !
 control-plane
 !
@@ -204,7 +202,7 @@ control-plane
 !
 !
 line con 0
- session-timeout 30 
+ session-timeout 30
  exec-timeout 0 0
  privilege level 15
  logging synchronous
@@ -222,9 +220,8 @@ line vty 0 4
 !
 ntp server 216.239.35.0
 ntp server 34.202.215.187
-ntp server 216.239.35.4 prefer
 ntp server pool.ntp.org
+ntp server 216.239.35.4 prefer
 !
 end
 
-ISP1#
