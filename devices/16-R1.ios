@@ -1,14 +1,13 @@
-Current configuration : 3098 bytes
+Current configuration : 2505 bytes
 !
-! Last configuration change at 09:59:01 MST Sun Dec 15 2024
+! Last configuration change at 14:08:15 MST Wed Dec 24 2025 by lab
 !
 version 15.7
-service config
 service timestamps debug datetime msec localtime show-timezone year
 service timestamps log datetime msec localtime show-timezone year
 no service password-encryption
 !
-hostname ISP1
+hostname R1
 !
 boot-start-marker
 boot-end-marker
@@ -86,31 +85,25 @@ redundancy
 !
 !
 interface Ethernet0/0
- description PA-410
- ip address 10.0.1.21 255.255.255.0
- ip nat outside
+ description Enterprise
+ ip address 100.64.0.10 255.255.255.0
  ip virtual-reassembly in
  duplex auto
 !
 interface Ethernet0/1
- description pub-s1
- ip address 100.64.1.1 255.255.255.248
- ip nat inside
+ description R2 e0/0
+ ip address 100.64.12.16 255.255.255.0
  ip virtual-reassembly in
  duplex auto
 !
 interface Ethernet0/2
- description site02-pub-sw1
- ip address 100.64.1.9 255.255.255.248
- ip nat inside
- ip virtual-reassembly in
+ no ip address
+ shutdown
  duplex auto
 !
 interface Ethernet0/3
- description site03-pub-s1 e0/0
- ip address 100.64.1.17 255.255.255.248
- ip nat inside
- ip virtual-reassembly in
+ no ip address
+ shutdown
  duplex auto
 !
 interface Ethernet1/0
@@ -133,66 +126,30 @@ interface Ethernet1/3
  shutdown
  duplex auto
 !
-interface Ethernet2/0
- no ip address
- shutdown
- duplex auto
-!
-interface Ethernet2/1
- no ip address
- shutdown
- duplex auto
-!
-interface Ethernet2/2
- no ip address
- shutdown
- duplex auto
-!
-interface Ethernet2/3
- no ip address
- shutdown
- duplex auto
-!
-interface Ethernet3/0
- no ip address
- shutdown
- duplex auto
-!
-interface Ethernet3/1
- no ip address
- shutdown
- duplex auto
-!
-interface Ethernet3/2
- no ip address
- shutdown
- duplex auto
-!
-interface Ethernet3/3
- description mgmt-cloud9
- ip address 172.31.255.3 255.255.255.0
- ip nat inside
- ip virtual-reassembly in
- duplex auto
+router bgp 65001
+ bgp router-id 100.64.12.16
+ bgp log-neighbor-changes
+ network 0.0.0.0
+ neighbor 100.64.12.1 remote-as 65002
+ neighbor 100.64.12.1 description R2
+ neighbor 100.64.12.1 soft-reconfiguration inbound
 !
 ip forward-protocol nd
 !
 !
 no ip http server
 no ip http secure-server
-ip nat inside source list 1 interface Ethernet0/0 overload
-ip route 0.0.0.0 0.0.0.0 10.0.1.1 250
+ip route 0.0.0.0 0.0.0.0 100.64.0.1
+ip route 10.0.0.0 255.0.0.0 Null0
+ip route 172.16.0.0 255.240.0.0 Null0
+ip route 172.16.253.123 255.255.255.255 100.64.0.1
+ip route 172.16.254.200 255.255.255.255 100.64.0.1
+ip route 192.168.0.0 255.255.0.0 Null0
 ip ssh version 2
 !
 ipv6 ioam timestamp
 !
-snmp-server community sfc.read RO
-snmp-server ifindex persist
-snmp-server location site01
-snmp-server chassis-id ISP1
 !
-access-list 1 permit 100.64.0.0 0.3.255.255
-access-list 1 permit 172.31.255.0 0.0.0.255
 !
 control-plane
 !
@@ -223,8 +180,7 @@ line vty 0 4
 ntp server 216.239.35.0
 ntp server 34.202.215.187
 ntp server 216.239.35.4 prefer
+ntp server 34.208.249.133
 ntp server pool.ntp.org
 !
 end
-
-ISP1#

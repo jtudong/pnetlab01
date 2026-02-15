@@ -1,0 +1,160 @@
+Current configuration : 1947 bytes
+!
+version 15.7
+service timestamps debug datetime msec localtime show-timezone year
+service timestamps log datetime msec localtime show-timezone year
+no service password-encryption
+!
+hostname R4
+!
+boot-start-marker
+boot-end-marker
+!
+!
+logging buffered 32768
+enable password cisco
+!
+no aaa new-model
+!
+!
+!
+clock timezone MST -7 0
+mmi polling-interval 60
+no mmi auto-configure
+no mmi pvc
+mmi snmp-timeout 180
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+
+
+!
+ip vrf management
+!
+!
+!
+!
+ip domain name shamrock.lab
+ip name-server 208.67.222.222
+ip cef
+login on-failure log
+login on-success log
+no ipv6 cef
+!
+multilink bundle-name authenticated
+!
+!
+!
+!
+!
+!
+!
+!
+!
+username lab privilege 15 password 0 lab
+username cisco privilege 15 password 0 cisco
+!
+redundancy
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+interface Ethernet0/0
+ description R2 e0/1
+ ip address 100.64.24.2 255.255.255.0
+ duplex auto
+!
+interface Ethernet0/1
+ description pub-s1 e0/0 : vlan999
+ ip address 100.65.0.2 255.255.255.0
+ ip ospf 1 area 0.0.0.0
+ duplex auto
+!
+interface Ethernet0/2
+ no ip address
+ shutdown
+ duplex auto
+!
+interface Ethernet0/3
+ no ip address
+ shutdown
+ duplex auto
+!
+router ospf 1
+ router-id 100.65.0.2
+ default-information originate always metric 10
+!
+router bgp 64512
+ bgp router-id 100.64.24.2
+ bgp log-neighbor-changes
+ network 100.65.0.0 mask 255.255.255.0
+ neighbor 100.64.24.1 remote-as 65002
+ neighbor 100.64.24.1 soft-reconfiguration inbound
+!
+ip forward-protocol nd
+!
+!
+no ip http server
+no ip http secure-server
+!
+ipv6 ioam timestamp
+!
+!
+!
+control-plane
+!
+!
+!
+!
+!
+!
+!
+!
+line con 0
+ session-timeout 30
+ exec-timeout 0 0
+ privilege level 15
+ logging synchronous
+ login local
+line aux 0
+ exec-timeout 0 0
+ privilege level 15
+ logging synchronous
+line vty 0 4
+ exec-timeout 720 0
+ logging synchronous
+ login local
+ transport preferred none
+ transport input telnet ssh
+!
+ntp server 216.239.35.0
+ntp server 34.202.215.187
+ntp server 216.239.35.4 prefer
+ntp server pool.ntp.org
+!
+end
+
+
