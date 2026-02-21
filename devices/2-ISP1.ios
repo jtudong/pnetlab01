@@ -1,24 +1,23 @@
-Current configuration : 1947 bytes
+Current configuration : 1999 bytes
+!
+! Last configuration change at 17:48:05 UTC Sun Feb 15 2026
 !
 version 15.7
-service timestamps debug datetime msec localtime show-timezone year
-service timestamps log datetime msec localtime show-timezone year
+service timestamps debug datetime msec
+service timestamps log datetime msec
 no service password-encryption
 !
-hostname R4
+hostname ISP1
 !
 boot-start-marker
 boot-end-marker
 !
 !
-logging buffered 32768
-enable password cisco
 !
 no aaa new-model
 !
 !
 !
-clock timezone MST -7 0
 mmi polling-interval 60
 no mmi auto-configure
 no mmi pvc
@@ -28,6 +27,7 @@ mmi snmp-timeout 180
 !
 !
 !
+no ip icmp rate-limit unreachable
 !
 !
 !
@@ -41,16 +41,11 @@ mmi snmp-timeout 180
 
 
 !
-ip vrf management
 !
 !
 !
-!
-ip domain name shamrock.lab
-ip name-server 208.67.222.222
+no ip domain lookup
 ip cef
-login on-failure log
-login on-success log
 no ipv6 cef
 !
 multilink bundle-name authenticated
@@ -68,7 +63,9 @@ username cisco privilege 15 password 0 cisco
 !
 redundancy
 !
+no cdp log mismatch duplex
 !
+ip tcp synwait-time 5
 !
 !
 !
@@ -83,36 +80,49 @@ redundancy
 !
 !
 interface Ethernet0/0
- description R2 e0/1
- ip address 100.64.24.2 255.255.255.0
+ description inet e0/1
+ ip address 100.90.0.2 255.255.255.0
  duplex auto
 !
 interface Ethernet0/1
- description pub-s1 e0/0 : vlan999
- ip address 100.65.0.2 255.255.255.0
- ip ospf 1 area 0.0.0.0
+ description site0-edge-s1 e0/0
+ ip address 100.90.1.1 255.255.255.0
  duplex auto
 !
 interface Ethernet0/2
  no ip address
- shutdown
  duplex auto
 !
 interface Ethernet0/3
  no ip address
- shutdown
  duplex auto
 !
-router ospf 1
- router-id 100.65.0.2
- default-information originate always metric 10
+interface Ethernet1/0
+ no ip address
+ duplex auto
 !
-router bgp 64512
- bgp router-id 100.64.24.2
+interface Ethernet1/1
+ no ip address
+ duplex auto
+!
+interface Ethernet1/2
+ no ip address
+ duplex auto
+!
+interface Ethernet1/3
+ no ip address
+ duplex auto
+!
+router bgp 65002
+ bgp router-id 100.90.0.2
  bgp log-neighbor-changes
- network 100.65.0.0 mask 255.255.255.0
- neighbor 100.64.24.1 remote-as 65002
- neighbor 100.64.24.1 soft-reconfiguration inbound
+ network 100.90.0.0 mask 255.255.255.0
+ neighbor 100.90.0.1 remote-as 65001
+ neighbor 100.90.0.1 description inet
+ neighbor 100.90.0.1 soft-reconfiguration inbound
+ neighbor 100.90.1.2 remote-as 64512
+ neighbor 100.90.1.2 description site0
+ neighbor 100.90.1.2 soft-reconfiguration inbound
 !
 ip forward-protocol nd
 !
@@ -150,11 +160,5 @@ line vty 0 4
  transport preferred none
  transport input telnet ssh
 !
-ntp server 216.239.35.0
-ntp server 34.202.215.187
-ntp server 216.239.35.4 prefer
-ntp server pool.ntp.org
 !
 end
-
-
