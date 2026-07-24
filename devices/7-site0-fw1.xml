@@ -1,0 +1,872 @@
+<response status="success" code="19">
+  <result total-count="1" count="1">
+    <deviceconfig>
+      <system>
+        <type>
+          <static/>
+        </type>
+        <update-server>updates.paloaltonetworks.com</update-server>
+        <update-schedule>
+          <threats>
+            <recurring>
+              <every-30-mins>
+                <at>2</at>
+                <action>download-and-install</action>
+              </every-30-mins>
+            </recurring>
+          </threats>
+          <anti-virus>
+            <recurring>
+              <hourly>
+                <at>6</at>
+                <action>download-and-install</action>
+              </hourly>
+            </recurring>
+          </anti-virus>
+          <wildfire>
+            <recurring>
+              <every-15-mins>
+                <at>0</at>
+                <action>download-and-install</action>
+              </every-15-mins>
+            </recurring>
+          </wildfire>
+        </update-schedule>
+        <timezone>America/Phoenix</timezone>
+        <service>
+          <disable-telnet>yes</disable-telnet>
+          <disable-http>yes</disable-http>
+        </service>
+        <hostname>SITE0-FW1</hostname>
+        <device-telemetry>
+          <device-health-performance>yes</device-health-performance>
+          <product-usage>yes</product-usage>
+          <threat-prevention>yes</threat-prevention>
+          <region>Americas</region>
+        </device-telemetry>
+        <dns-setting>
+          <servers>
+            <primary>208.67.222.222</primary>
+            <secondary>4.2.2.1</secondary>
+          </servers>
+        </dns-setting>
+        <ip-address>10.0.92.5</ip-address>
+        <netmask>255.255.255.0</netmask>
+        <default-gateway>10.0.92.1</default-gateway>
+      </system>
+      <setting>
+        <config>
+          <rematch>yes</rematch>
+        </config>
+        <management>
+          <hostname-type-in-syslog>FQDN</hostname-type-in-syslog>
+        </management>
+        <auto-mac-detect>yes</auto-mac-detect>
+      </setting>
+    </deviceconfig>
+  </result>
+</response>
+<response status="success" code="19">
+  <result total-count="1" count="1">
+    <network>
+      <interface>
+        <ethernet>
+          <entry name="ethernet1/1">
+            <layer3>
+              <ndp-proxy>
+                <enabled>no</enabled>
+              </ndp-proxy>
+              <sdwan-link-settings>
+                <upstream-nat>
+                  <enable>no</enable>
+                  <static-ip/>
+                </upstream-nat>
+                <enable>no</enable>
+                <ipv6-enable>no</ipv6-enable>
+              </sdwan-link-settings>
+              <ip>
+                <entry name="192.0.2.2/24"/>
+              </ip>
+              <lldp>
+                <enable>no</enable>
+              </lldp>
+              <interface-management-profile>ping</interface-management-profile>
+            </layer3>
+            <comment>ISP 1</comment>
+          </entry>
+          <entry name="ethernet1/2">
+            <layer3>
+              <ndp-proxy>
+                <enabled>no</enabled>
+              </ndp-proxy>
+              <sdwan-link-settings>
+                <upstream-nat>
+                  <enable>no</enable>
+                  <static-ip/>
+                </upstream-nat>
+                <enable>no</enable>
+                <ipv6-enable>no</ipv6-enable>
+              </sdwan-link-settings>
+              <lldp>
+                <enable>no</enable>
+              </lldp>
+              <ip>
+                <entry name="10.0.2.1/30"/>
+              </ip>
+              <interface-management-profile>inside mgmt</interface-management-profile>
+            </layer3>
+            <comment>site0-core1 e0/0</comment>
+          </entry>
+        </ethernet>
+      </interface>
+      <profiles>
+        <monitor-profile>
+          <entry name="default">
+            <interval>3</interval>
+            <threshold>5</threshold>
+            <action>wait-recover</action>
+          </entry>
+        </monitor-profile>
+        <interface-management-profile>
+          <entry name="ping">
+            <ping>yes</ping>
+          </entry>
+          <entry name="inside mgmt">
+            <https>yes</https>
+            <ssh>yes</ssh>
+            <ping>yes</ping>
+          </entry>
+        </interface-management-profile>
+      </profiles>
+      <ike>
+        <crypto-profiles>
+          <ike-crypto-profiles>
+            <entry name="default">
+              <encryption>
+                <member>aes-128-cbc</member>
+                <member>3des</member>
+              </encryption>
+              <hash>
+                <member>sha1</member>
+              </hash>
+              <dh-group>
+                <member>group2</member>
+              </dh-group>
+              <lifetime>
+                <hours>8</hours>
+              </lifetime>
+            </entry>
+            <entry name="Suite-B-GCM-128">
+              <encryption>
+                <member>aes-128-cbc</member>
+              </encryption>
+              <hash>
+                <member>sha256</member>
+              </hash>
+              <dh-group>
+                <member>group19</member>
+              </dh-group>
+              <lifetime>
+                <hours>8</hours>
+              </lifetime>
+            </entry>
+            <entry name="Suite-B-GCM-256">
+              <encryption>
+                <member>aes-256-cbc</member>
+              </encryption>
+              <hash>
+                <member>sha384</member>
+              </hash>
+              <dh-group>
+                <member>group20</member>
+              </dh-group>
+              <lifetime>
+                <hours>8</hours>
+              </lifetime>
+            </entry>
+          </ike-crypto-profiles>
+          <ipsec-crypto-profiles>
+            <entry name="default">
+              <esp>
+                <encryption>
+                  <member>aes-128-cbc</member>
+                  <member>3des</member>
+                </encryption>
+                <authentication>
+                  <member>sha1</member>
+                </authentication>
+              </esp>
+              <dh-group>group2</dh-group>
+              <lifetime>
+                <hours>1</hours>
+              </lifetime>
+            </entry>
+            <entry name="Suite-B-GCM-128">
+              <esp>
+                <encryption>
+                  <member>aes-128-gcm</member>
+                </encryption>
+                <authentication>
+                  <member>none</member>
+                </authentication>
+              </esp>
+              <dh-group>group19</dh-group>
+              <lifetime>
+                <hours>1</hours>
+              </lifetime>
+            </entry>
+            <entry name="Suite-B-GCM-256">
+              <esp>
+                <encryption>
+                  <member>aes-256-gcm</member>
+                </encryption>
+                <authentication>
+                  <member>none</member>
+                </authentication>
+              </esp>
+              <dh-group>group20</dh-group>
+              <lifetime>
+                <hours>1</hours>
+              </lifetime>
+            </entry>
+          </ipsec-crypto-profiles>
+          <global-protect-app-crypto-profiles>
+            <entry name="default">
+              <encryption>
+                <member>aes-128-cbc</member>
+              </encryption>
+              <authentication>
+                <member>sha1</member>
+              </authentication>
+            </entry>
+          </global-protect-app-crypto-profiles>
+        </crypto-profiles>
+      </ike>
+      <qos>
+        <profile>
+          <entry name="default">
+            <class-bandwidth-type>
+              <mbps>
+                <class>
+                  <entry name="class1">
+                    <priority>real-time</priority>
+                  </entry>
+                  <entry name="class2">
+                    <priority>high</priority>
+                  </entry>
+                  <entry name="class3">
+                    <priority>high</priority>
+                  </entry>
+                  <entry name="class4">
+                    <priority>medium</priority>
+                  </entry>
+                  <entry name="class5">
+                    <priority>medium</priority>
+                  </entry>
+                  <entry name="class6">
+                    <priority>low</priority>
+                  </entry>
+                  <entry name="class7">
+                    <priority>low</priority>
+                  </entry>
+                  <entry name="class8">
+                    <priority>low</priority>
+                  </entry>
+                </class>
+              </mbps>
+            </class-bandwidth-type>
+          </entry>
+        </profile>
+      </qos>
+      <virtual-router>
+        <entry name="VR1">
+          <ecmp>
+            <algorithm>
+              <ip-modulo/>
+            </algorithm>
+          </ecmp>
+          <protocol>
+            <bgp>
+              <enable>no</enable>
+              <routing-options>
+                <graceful-restart>
+                  <enable>yes</enable>
+                </graceful-restart>
+              </routing-options>
+            </bgp>
+            <rip>
+              <enable>no</enable>
+            </rip>
+            <ospf>
+              <router-id>10.0.0.2</router-id>
+              <reject-default-route>no</reject-default-route>
+              <enable>yes</enable>
+              <area>
+                <entry name="0.0.0.0">
+                  <type>
+                    <normal/>
+                  </type>
+                  <interface>
+                    <entry name="ethernet1/1">
+                      <bfd>
+                        <profile>Inherit-vr-global-setting</profile>
+                      </bfd>
+                      <enable>yes</enable>
+                      <passive>no</passive>
+                      <gr-delay>10</gr-delay>
+                      <metric>10</metric>
+                      <priority>0</priority>
+                      <hello-interval>10</hello-interval>
+                      <dead-counts>4</dead-counts>
+                      <retransmit-interval>5</retransmit-interval>
+                      <transit-delay>1</transit-delay>
+                    </entry>
+                    <entry name="ethernet1/2">
+                      <bfd>
+                        <profile>Inherit-vr-global-setting</profile>
+                      </bfd>
+                      <enable>yes</enable>
+                      <passive>no</passive>
+                      <gr-delay>10</gr-delay>
+                      <metric>20</metric>
+                      <priority>0</priority>
+                      <hello-interval>10</hello-interval>
+                      <dead-counts>4</dead-counts>
+                      <retransmit-interval>5</retransmit-interval>
+                      <transit-delay>1</transit-delay>
+                    </entry>
+                  </interface>
+                </entry>
+              </area>
+            </ospf>
+            <ospfv3>
+              <enable>no</enable>
+            </ospfv3>
+          </protocol>
+          <interface>
+            <member>ethernet1/1</member>
+            <member>ethernet1/2</member>
+          </interface>
+        </entry>
+      </virtual-router>
+    </network>
+  </result>
+</response>
+<response status="success" code="19">
+  <result total-count="1" count="1">
+    <shared>
+      <application/>
+      <application-group/>
+      <service/>
+      <service-group/>
+      <botnet>
+        <configuration>
+          <http>
+            <dynamic-dns>
+              <enabled>yes</enabled>
+              <threshold>5</threshold>
+            </dynamic-dns>
+            <malware-sites>
+              <enabled>yes</enabled>
+              <threshold>5</threshold>
+            </malware-sites>
+            <recent-domains>
+              <enabled>yes</enabled>
+              <threshold>5</threshold>
+            </recent-domains>
+            <ip-domains>
+              <enabled>yes</enabled>
+              <threshold>10</threshold>
+            </ip-domains>
+            <executables-from-unknown-sites>
+              <enabled>yes</enabled>
+              <threshold>5</threshold>
+            </executables-from-unknown-sites>
+          </http>
+          <other-applications>
+            <irc>yes</irc>
+          </other-applications>
+          <unknown-applications>
+            <unknown-tcp>
+              <destinations-per-hour>10</destinations-per-hour>
+              <sessions-per-hour>10</sessions-per-hour>
+              <session-length>
+                <maximum-bytes>100</maximum-bytes>
+                <minimum-bytes>50</minimum-bytes>
+              </session-length>
+            </unknown-tcp>
+            <unknown-udp>
+              <destinations-per-hour>10</destinations-per-hour>
+              <sessions-per-hour>10</sessions-per-hour>
+              <session-length>
+                <maximum-bytes>100</maximum-bytes>
+                <minimum-bytes>50</minimum-bytes>
+              </session-length>
+            </unknown-udp>
+          </unknown-applications>
+        </configuration>
+        <report>
+          <topn>100</topn>
+          <scheduled>yes</scheduled>
+        </report>
+      </botnet>
+    </shared>
+  </result>
+</response>
+<response status="success" code="19">
+  <result total-count="1" count="1">
+    <zone>
+      <entry name="UNTRUST">
+        <network>
+          <layer3>
+            <member>ethernet1/1</member>
+          </layer3>
+        </network>
+      </entry>
+      <entry name="TRUST">
+        <network>
+          <layer3>
+            <member>ethernet1/2</member>
+          </layer3>
+        </network>
+        <enable-user-identification>yes</enable-user-identification>
+      </entry>
+    </zone>
+  </result>
+</response>
+<response status="success" code="7">
+  <result/>
+</response>
+<response status="success" code="7">
+  <result/>
+</response>
+<response status="success" code="7">
+  <result/>
+</response>
+<response status="success" code="7">
+  <result/>
+</response>
+<response status="success" code="7">
+  <result/>
+</response>
+<response status="success" code="7">
+  <result/>
+</response>
+<response status="success" code="7">
+  <result/>
+</response>
+<response status="success" code="7">
+  <result/>
+</response>
+<response status="success" code="7">
+  <result/>
+</response>
+<response status="success" code="7">
+  <result/>
+</response>
+<response status="success" code="19">
+  <result total-count="1" count="1">
+    <service-group/>
+  </result>
+</response>
+<response status="success" code="19">
+  <result total-count="1" count="1">
+    <service/>
+  </result>
+</response>
+<response status="success" code="7">
+  <result/>
+</response>
+<response status="success" code="19">
+  <result total-count="1" count="1">
+    <schedule/>
+  </result>
+</response>
+<response status="success" code="19">
+  <result total-count="1" count="1">
+    <rulebase>
+      <default-security-rules>
+        <rules>
+          <entry name="intrazone-default" uuid="7db730fd-73ad-4a3b-89a0-d0d8f653ea7f">
+            <action>drop</action>
+            <log-start>no</log-start>
+            <log-end>yes</log-end>
+          </entry>
+          <entry name="interzone-default" uuid="4d4cd328-8f20-4919-bc82-022923de728f">
+            <action>drop</action>
+            <log-start>no</log-start>
+            <log-end>yes</log-end>
+          </entry>
+        </rules>
+      </default-security-rules>
+      <security>
+        <rules>
+          <entry name="drop quic" uuid="2227cadf-7226-44b0-923c-57a28ca0bad7">
+            <to>
+              <member>any</member>
+            </to>
+            <from>
+              <member>any</member>
+            </from>
+            <source>
+              <member>any</member>
+            </source>
+            <destination>
+              <member>any</member>
+            </destination>
+            <source-user>
+              <member>any</member>
+            </source-user>
+            <category>
+              <member>any</member>
+            </category>
+            <application>
+              <member>quic</member>
+            </application>
+            <service>
+              <member>application-default</member>
+            </service>
+            <source-hip>
+              <member>any</member>
+            </source-hip>
+            <destination-hip>
+              <member>any</member>
+            </destination-hip>
+            <action>drop</action>
+            <log-start>no</log-start>
+            <log-end>yes</log-end>
+          </entry>
+          <entry name="allow web" uuid="59d48711-1a3b-4588-bf57-8929b35ffc4d">
+            <to>
+              <member>any</member>
+            </to>
+            <from>
+              <member>TRUST</member>
+            </from>
+            <source>
+              <member>any</member>
+            </source>
+            <destination>
+              <member>any</member>
+            </destination>
+            <source-user>
+              <member>any</member>
+            </source-user>
+            <category>
+              <member>any</member>
+            </category>
+            <application>
+              <member>ssl</member>
+              <member>web-browsing</member>
+            </application>
+            <service>
+              <member>application-default</member>
+            </service>
+            <source-hip>
+              <member>any</member>
+            </source-hip>
+            <destination-hip>
+              <member>any</member>
+            </destination-hip>
+            <action>allow</action>
+            <log-start>no</log-start>
+            <log-end>yes</log-end>
+          </entry>
+          <entry name="allow low-medium apps" uuid="855b422d-7525-4b02-9e48-006bf39129ba">
+            <to>
+              <member>any</member>
+            </to>
+            <from>
+              <member>TRUST</member>
+            </from>
+            <source>
+              <member>any</member>
+            </source>
+            <destination>
+              <member>any</member>
+            </destination>
+            <source-user>
+              <member>any</member>
+            </source-user>
+            <category>
+              <member>any</member>
+            </category>
+            <application>
+              <member>LOW-MEDIUM</member>
+            </application>
+            <service>
+              <member>application-default</member>
+            </service>
+            <source-hip>
+              <member>any</member>
+            </source-hip>
+            <destination-hip>
+              <member>any</member>
+            </destination-hip>
+            <action>allow</action>
+            <log-start>no</log-start>
+            <log-end>yes</log-end>
+          </entry>
+          <entry name="allow OSPF" uuid="af958891-6789-4f29-bb2d-1ee9836c08d2">
+            <to>
+              <member>any</member>
+            </to>
+            <from>
+              <member>any</member>
+            </from>
+            <source>
+              <member>any</member>
+            </source>
+            <destination>
+              <member>any</member>
+            </destination>
+            <source-user>
+              <member>any</member>
+            </source-user>
+            <category>
+              <member>any</member>
+            </category>
+            <application>
+              <member>ospf</member>
+            </application>
+            <service>
+              <member>application-default</member>
+            </service>
+            <source-hip>
+              <member>any</member>
+            </source-hip>
+            <destination-hip>
+              <member>any</member>
+            </destination-hip>
+            <action>allow</action>
+            <log-start>no</log-start>
+            <log-end>yes</log-end>
+          </entry>
+          <entry name="allow all" uuid="738968f6-0e0e-4787-ac2c-dd806492c41a">
+            <to>
+              <member>any</member>
+            </to>
+            <from>
+              <member>any</member>
+            </from>
+            <source>
+              <member>any</member>
+            </source>
+            <destination>
+              <member>any</member>
+            </destination>
+            <source-user>
+              <member>any</member>
+            </source-user>
+            <category>
+              <member>any</member>
+            </category>
+            <application>
+              <member>any</member>
+            </application>
+            <service>
+              <member>application-default</member>
+            </service>
+            <source-hip>
+              <member>any</member>
+            </source-hip>
+            <destination-hip>
+              <member>any</member>
+            </destination-hip>
+            <action>allow</action>
+            <log-start>no</log-start>
+            <log-end>yes</log-end>
+          </entry>
+        </rules>
+      </security>
+      <nat>
+        <rules>
+          <entry name="ISP1 NAT" uuid="cfde2022-854f-4056-8dbc-649328c5dc83">
+            <source-translation>
+              <dynamic-ip-and-port>
+                <interface-address>
+                  <interface>ethernet1/1</interface>
+                </interface-address>
+              </dynamic-ip-and-port>
+            </source-translation>
+            <to>
+              <member>UNTRUST</member>
+            </to>
+            <from>
+              <member>TRUST</member>
+            </from>
+            <source>
+              <member>any</member>
+            </source>
+            <destination>
+              <member>any</member>
+            </destination>
+            <service>any</service>
+            <to-interface>ethernet1/1</to-interface>
+          </entry>
+        </rules>
+      </nat>
+    </rulebase>
+  </result>
+</response>
+<response status="success" code="7">
+  <result/>
+</response>
+<response status="success" code="7">
+  <result/>
+</response>
+<response status="success" code="7">
+  <result/>
+</response>
+<response status="success" code="7">
+  <result/>
+</response>
+<response status="success" code="7">
+  <result/>
+</response>
+<response status="success" code="7">
+  <result/>
+</response>
+<response status="success" code="7">
+  <result/>
+</response>
+<response status="success" code="7">
+  <result/>
+</response>
+<response status="success" code="7">
+  <result/>
+</response>
+<response status="success" code="7">
+  <result/>
+</response>
+<response status="success" code="7">
+  <result/>
+</response>
+<response status="success" code="19">
+  <result total-count="1" count="1">
+    <import>
+      <network>
+        <interface>
+          <member>ethernet1/1</member>
+          <member>ethernet1/2</member>
+        </interface>
+      </network>
+    </import>
+  </result>
+</response>
+<response status="success" code="7">
+  <result/>
+</response>
+<response status="success" code="7">
+  <result/>
+</response>
+<response status="success" code="7">
+  <result/>
+</response>
+<response status="success" code="7">
+  <result/>
+</response>
+<response status="success" code="7">
+  <result/>
+</response>
+<response status="success" code="7">
+  <result/>
+</response>
+<response status="success" code="7">
+  <result/>
+</response>
+<response status="success" code="7">
+  <result/>
+</response>
+<response status="success" code="7">
+  <result/>
+</response>
+<response status="success" code="7">
+  <result/>
+</response>
+<response status="success" code="7">
+  <result/>
+</response>
+<response status="success" code="7">
+  <result/>
+</response>
+<response status="success" code="7">
+  <result/>
+</response>
+<response status="success" code="19">
+  <result total-count="1" count="1">
+    <application-group/>
+  </result>
+</response>
+<response status="success" code="19">
+  <result total-count="1" count="1">
+    <application-filter>
+      <entry name="LOW-MEDIUM">
+        <risk>
+          <member>1</member>
+          <member>2</member>
+          <member>3</member>
+        </risk>
+      </entry>
+    </application-filter>
+  </result>
+</response>
+<response status="success" code="19">
+  <result total-count="1" count="1">
+    <application/>
+  </result>
+</response>
+<response status="success" code="7">
+  <result/>
+</response>
+<response status="success" code="7">
+  <result/>
+</response>
+<response status="success" code="19">
+  <result total-count="1" count="1">
+    <mgt-config>
+      <users>
+        <entry name="admin">
+          <phash>$5$gkjiltqn$RkR9Mu8qxx51/SbRxp.B0vpSU/MMktrj5zlDMxoPog4</phash>
+          <permissions>
+            <role-based>
+              <superuser>yes</superuser>
+            </role-based>
+          </permissions>
+        </entry>
+        <entry name="__openconfig">
+          <phash>$5$oqnqwgth$vbINUNL/LiuneFers/8ec/dTgio12/yZdxG.ftXY0W3</phash>
+          <permissions>
+            <role-based>
+              <deviceadmin>
+                <member>localhost.localdomain</member>
+              </deviceadmin>
+            </role-based>
+          </permissions>
+        </entry>
+        <entry name="__telemetryuser">
+          <phash>$5$wagbopaf$LIeLziCNlVkkV8zqrv/o5A44rJ/7AHGoz2GGM1C7oYA</phash>
+          <permissions>
+            <role-based>
+              <deviceadmin>
+                <member>localhost.localdomain</member>
+              </deviceadmin>
+            </role-based>
+          </permissions>
+        </entry>
+        <entry name="lab">
+          <permissions>
+            <role-based>
+              <superuser>yes</superuser>
+            </role-based>
+          </permissions>
+          <phash>$5$xtwnrxps$X5A/mDXHA9xuDzSzFlgV/xhiWKdhRXUNogHseUGHyg9</phash>
+        </entry>
+      </users>
+      <password-complexity>
+        <enabled>yes</enabled>
+        <minimum-length>3</minimum-length>
+      </password-complexity>
+    </mgt-config>
+  </result>
+</response>
