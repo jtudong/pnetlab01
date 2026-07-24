@@ -1,199 +1,237 @@
-Current configuration : 3223 bytes
-!
-! Last configuration change at 14:55:33 MST Tue Dec 23 2025 by lab
-!
-version 15.2
-service timestamps debug datetime msec localtime show-timezone year
-service timestamps log datetime msec localtime show-timezone year
-no service password-encryption
-service compress-config
-!
-hostname core-sw1
-!
-boot-start-marker
-boot-end-marker
-!
-!
-logging buffered 32768
-enable password cisco
-!
-username lab privilege 15 password 0 lab
-username cisco privilege 15 password 0 cisco
-no aaa new-model
-clock timezone MST -7 0
-!
-!
-!
-!
-!
-vtp mode off
-!
-ip vrf management
-!
-!
-!
-ip domain-name shamrock.lab
-ip name-server 208.67.222.222
-ip cef
-login on-failure log
-login on-success log
-no ipv6 cef
-!
-!
-!
-spanning-tree mode pvst
-spanning-tree extend system-id
-!
-!
-vlan 2
- name management
-!
-vlan 10
- name workstations
-!
-vlan 20
- name servers
-!
-! 
-!
-!
-!
-!
-!
-!
-!
-!
-!
-!
-!
-!
-interface Ethernet0/0
- description FW-1 eth1/2
- switchport access vlan 2
- switchport mode access
- spanning-tree bpduguard enable
-!
-interface Ethernet0/1
- description FW-1 mgmt
- switchport access vlan 2
- switchport mode access
- spanning-tree portfast edge
-!
-interface Ethernet0/2
- description server1
- switchport access vlan 20
- switchport mode access
- spanning-tree portfast edge
-!
-interface Ethernet0/3
- description DC1
- switchport access vlan 20
- switchport mode access
- spanning-tree portfast edge
-!
-interface Ethernet1/0
- description Win1
- switchport access vlan 10
- switchport mode access
- spanning-tree portfast edge
-!
-interface Ethernet1/1
- description Panorama
- switchport access vlan 20
- switchport mode access
- spanning-tree portfast edge
-!
-interface Ethernet1/2
- description Docker
- switchport access vlan 20
- switchport mode access
- spanning-tree portfast edge
-!
-interface Ethernet1/3
- description Linux1
- switchport access vlan 20
- switchport mode access
- spanning-tree portfast edge
-!
-interface Ethernet2/0
- switchport access vlan 10
- switchport mode access
- spanning-tree portfast edge
-!
-interface Ethernet2/1
-!
-interface Ethernet2/2
-!
-interface Ethernet2/3
-!
-interface Ethernet3/0
-!
-interface Ethernet3/1
-!
-interface Ethernet3/2
-!
-interface Ethernet3/3
-!
-interface Vlan2
- description management
- ip address 10.0.2.1 255.255.255.0
- no ip redirects
- ip ospf 1 area 0.0.0.0
-!
-interface Vlan10
- description workstations
- ip address 10.0.10.1 255.255.255.0
- ip helper-address 10.0.20.10 
- no ip redirects
- ip ospf 1 area 0.0.0.0
-!
-interface Vlan20
- description servers
- ip address 10.0.20.1 255.255.255.0
- ip helper-address 10.0.20.10 
- no ip redirects
- ip ospf 1 area 0.0.0.0
-!
-router ospf 1
- router-id 10.0.2.1
- passive-interface default
- no passive-interface Vlan2
-!
-ip forward-protocol nd
-!
-no ip http server
-no ip http secure-server
-!
-ip route 0.0.0.0 0.0.0.0 10.1.2.10 254
-ip ssh version 2
-ip ssh server algorithm encryption aes128-ctr aes192-ctr aes256-ctr
-ip ssh client algorithm encryption aes128-ctr aes192-ctr aes256-ctr
-!
-!
-!
-!
-!
-control-plane
-!
-!
-line con 0
- session-timeout 30 
- exec-timeout 0 0
- privilege level 15
- logging synchronous
- login local
-line aux 0
- exec-timeout 0 0
- privilege level 15
- logging synchronous
-line vty 0 4
- exec-timeout 720 0
- logging synchronous
- login local
- transport preferred none
- transport input telnet ssh
-!
-!
-!
-end
-
+set deviceconfig system type static
+set deviceconfig system update-server updates.paloaltonetworks.com
+set deviceconfig system update-schedule threats recurring every-30-mins at 2
+set deviceconfig system update-schedule threats recurring every-30-mins action download-and-install
+set deviceconfig system update-schedule anti-virus recurring hourly at 6
+set deviceconfig system update-schedule anti-virus recurring hourly action download-and-install
+set deviceconfig system update-schedule wildfire recurring every-15-mins at 0
+set deviceconfig system update-schedule wildfire recurring every-15-mins action download-and-install
+set deviceconfig system timezone America/Phoenix
+set deviceconfig system service disable-telnet yes
+set deviceconfig system service disable-http yes
+set deviceconfig system hostname SITE0-FW1
+set deviceconfig system device-telemetry device-health-performance yes
+set deviceconfig system device-telemetry product-usage yes
+set deviceconfig system device-telemetry threat-prevention yes
+set deviceconfig system device-telemetry region Americas
+set deviceconfig system dns-setting servers primary 208.67.222.222
+set deviceconfig system dns-setting servers secondary 4.2.2.1
+set deviceconfig system ip-address 10.0.92.5
+set deviceconfig system netmask 255.255.255.0
+set deviceconfig system default-gateway 10.0.92.1
+set deviceconfig setting config rematch yes
+set deviceconfig setting management hostname-type-in-syslog FQDN
+set deviceconfig setting auto-mac-detect yes
+set network interface ethernet ethernet1/1 layer3 ndp-proxy enabled no
+set network interface ethernet ethernet1/1 layer3 sdwan-link-settings upstream-nat enable no
+set network interface ethernet ethernet1/1 layer3 sdwan-link-settings upstream-nat static-ip
+set network interface ethernet ethernet1/1 layer3 sdwan-link-settings enable no
+set network interface ethernet ethernet1/1 layer3 sdwan-link-settings ipv6-enable no
+set network interface ethernet ethernet1/1 layer3 ip 192.0.2.2/24
+set network interface ethernet ethernet1/1 layer3 lldp enable no
+set network interface ethernet ethernet1/1 layer3 interface-management-profile ping
+set network interface ethernet ethernet1/1 comment "ISP 1"
+set network interface ethernet ethernet1/2 layer3 ndp-proxy enabled no
+set network interface ethernet ethernet1/2 layer3 sdwan-link-settings upstream-nat enable no
+set network interface ethernet ethernet1/2 layer3 sdwan-link-settings upstream-nat static-ip
+set network interface ethernet ethernet1/2 layer3 sdwan-link-settings enable no
+set network interface ethernet ethernet1/2 layer3 sdwan-link-settings ipv6-enable no
+set network interface ethernet ethernet1/2 layer3 lldp enable no
+set network interface ethernet ethernet1/2 layer3 ip 10.0.2.1/30
+set network interface ethernet ethernet1/2 layer3 interface-management-profile "inside mgmt"
+set network interface ethernet ethernet1/2 comment "site0-core1 e0/0"
+set network profiles monitor-profile default interval 3
+set network profiles monitor-profile default threshold 5
+set network profiles monitor-profile default action wait-recover
+set network profiles interface-management-profile ping ping yes
+set network profiles interface-management-profile "inside mgmt" https yes
+set network profiles interface-management-profile "inside mgmt" ssh yes
+set network profiles interface-management-profile "inside mgmt" ping yes
+set network ike crypto-profiles ike-crypto-profiles default encryption [ aes-128-cbc 3des ]
+set network ike crypto-profiles ike-crypto-profiles default hash sha1
+set network ike crypto-profiles ike-crypto-profiles default dh-group group2
+set network ike crypto-profiles ike-crypto-profiles default lifetime hours 8
+set network ike crypto-profiles ike-crypto-profiles Suite-B-GCM-128 encryption aes-128-cbc
+set network ike crypto-profiles ike-crypto-profiles Suite-B-GCM-128 hash sha256
+set network ike crypto-profiles ike-crypto-profiles Suite-B-GCM-128 dh-group group19
+set network ike crypto-profiles ike-crypto-profiles Suite-B-GCM-128 lifetime hours 8
+set network ike crypto-profiles ike-crypto-profiles Suite-B-GCM-256 encryption aes-256-cbc
+set network ike crypto-profiles ike-crypto-profiles Suite-B-GCM-256 hash sha384
+set network ike crypto-profiles ike-crypto-profiles Suite-B-GCM-256 dh-group group20
+set network ike crypto-profiles ike-crypto-profiles Suite-B-GCM-256 lifetime hours 8
+set network ike crypto-profiles ipsec-crypto-profiles default esp encryption [ aes-128-cbc 3des ]
+set network ike crypto-profiles ipsec-crypto-profiles default esp authentication sha1
+set network ike crypto-profiles ipsec-crypto-profiles default dh-group group2
+set network ike crypto-profiles ipsec-crypto-profiles default lifetime hours 1
+set network ike crypto-profiles ipsec-crypto-profiles Suite-B-GCM-128 esp encryption aes-128-gcm
+set network ike crypto-profiles ipsec-crypto-profiles Suite-B-GCM-128 esp authentication none
+set network ike crypto-profiles ipsec-crypto-profiles Suite-B-GCM-128 dh-group group19
+set network ike crypto-profiles ipsec-crypto-profiles Suite-B-GCM-128 lifetime hours 1
+set network ike crypto-profiles ipsec-crypto-profiles Suite-B-GCM-256 esp encryption aes-256-gcm
+set network ike crypto-profiles ipsec-crypto-profiles Suite-B-GCM-256 esp authentication none
+set network ike crypto-profiles ipsec-crypto-profiles Suite-B-GCM-256 dh-group group20
+set network ike crypto-profiles ipsec-crypto-profiles Suite-B-GCM-256 lifetime hours 1
+set network ike crypto-profiles global-protect-app-crypto-profiles default encryption aes-128-cbc
+set network ike crypto-profiles global-protect-app-crypto-profiles default authentication sha1
+set network qos profile default class-bandwidth-type mbps class class1 priority real-time
+set network qos profile default class-bandwidth-type mbps class class2 priority high
+set network qos profile default class-bandwidth-type mbps class class3 priority high
+set network qos profile default class-bandwidth-type mbps class class4 priority medium
+set network qos profile default class-bandwidth-type mbps class class5 priority medium
+set network qos profile default class-bandwidth-type mbps class class6 priority low
+set network qos profile default class-bandwidth-type mbps class class7 priority low
+set network qos profile default class-bandwidth-type mbps class class8 priority low
+set network virtual-router VR1 ecmp algorithm ip-modulo
+set network virtual-router VR1 protocol bgp enable no
+set network virtual-router VR1 protocol bgp routing-options graceful-restart enable yes
+set network virtual-router VR1 protocol rip enable no
+set network virtual-router VR1 protocol ospf router-id 10.0.0.2
+set network virtual-router VR1 protocol ospf reject-default-route no
+set network virtual-router VR1 protocol ospf enable yes
+set network virtual-router VR1 protocol ospf area 0.0.0.0 type normal
+set network virtual-router VR1 protocol ospf area 0.0.0.0 interface ethernet1/1 bfd profile Inherit-vr-global-setting
+set network virtual-router VR1 protocol ospf area 0.0.0.0 interface ethernet1/1 enable yes
+set network virtual-router VR1 protocol ospf area 0.0.0.0 interface ethernet1/1 passive no
+set network virtual-router VR1 protocol ospf area 0.0.0.0 interface ethernet1/1 gr-delay 10
+set network virtual-router VR1 protocol ospf area 0.0.0.0 interface ethernet1/1 metric 10
+set network virtual-router VR1 protocol ospf area 0.0.0.0 interface ethernet1/1 priority 0
+set network virtual-router VR1 protocol ospf area 0.0.0.0 interface ethernet1/1 hello-interval 10
+set network virtual-router VR1 protocol ospf area 0.0.0.0 interface ethernet1/1 dead-counts 4
+set network virtual-router VR1 protocol ospf area 0.0.0.0 interface ethernet1/1 retransmit-interval 5
+set network virtual-router VR1 protocol ospf area 0.0.0.0 interface ethernet1/1 transit-delay 1
+set network virtual-router VR1 protocol ospf area 0.0.0.0 interface ethernet1/2 bfd profile Inherit-vr-global-setting
+set network virtual-router VR1 protocol ospf area 0.0.0.0 interface ethernet1/2 enable yes
+set network virtual-router VR1 protocol ospf area 0.0.0.0 interface ethernet1/2 passive no
+set network virtual-router VR1 protocol ospf area 0.0.0.0 interface ethernet1/2 gr-delay 10
+set network virtual-router VR1 protocol ospf area 0.0.0.0 interface ethernet1/2 metric 20
+set network virtual-router VR1 protocol ospf area 0.0.0.0 interface ethernet1/2 priority 0
+set network virtual-router VR1 protocol ospf area 0.0.0.0 interface ethernet1/2 hello-interval 10
+set network virtual-router VR1 protocol ospf area 0.0.0.0 interface ethernet1/2 dead-counts 4
+set network virtual-router VR1 protocol ospf area 0.0.0.0 interface ethernet1/2 retransmit-interval 5
+set network virtual-router VR1 protocol ospf area 0.0.0.0 interface ethernet1/2 transit-delay 1
+set network virtual-router VR1 protocol ospfv3 enable no
+set network virtual-router VR1 interface [ ethernet1/1 ethernet1/2 ]
+set shared application
+set shared application-group
+set shared service
+set shared service-group
+set shared botnet configuration http dynamic-dns enabled yes
+set shared botnet configuration http dynamic-dns threshold 5
+set shared botnet configuration http malware-sites enabled yes
+set shared botnet configuration http malware-sites threshold 5
+set shared botnet configuration http recent-domains enabled yes
+set shared botnet configuration http recent-domains threshold 5
+set shared botnet configuration http ip-domains enabled yes
+set shared botnet configuration http ip-domains threshold 10
+set shared botnet configuration http executables-from-unknown-sites enabled yes
+set shared botnet configuration http executables-from-unknown-sites threshold 5
+set shared botnet configuration other-applications irc yes
+set shared botnet configuration unknown-applications unknown-tcp destinations-per-hour 10
+set shared botnet configuration unknown-applications unknown-tcp sessions-per-hour 10
+set shared botnet configuration unknown-applications unknown-tcp session-length maximum-bytes 100
+set shared botnet configuration unknown-applications unknown-tcp session-length minimum-bytes 50
+set shared botnet configuration unknown-applications unknown-udp destinations-per-hour 10
+set shared botnet configuration unknown-applications unknown-udp sessions-per-hour 10
+set shared botnet configuration unknown-applications unknown-udp session-length maximum-bytes 100
+set shared botnet configuration unknown-applications unknown-udp session-length minimum-bytes 50
+set shared botnet report topn 100
+set shared botnet report scheduled yes
+set zone UNTRUST network layer3 ethernet1/1
+set zone TRUST network layer3 ethernet1/2
+set zone TRUST enable-user-identification yes
+set service-group
+set service
+set schedule
+set rulebase default-security-rules rules intrazone-default action drop
+set rulebase default-security-rules rules intrazone-default log-start no
+set rulebase default-security-rules rules intrazone-default log-end yes
+set rulebase default-security-rules rules interzone-default action drop
+set rulebase default-security-rules rules interzone-default log-start no
+set rulebase default-security-rules rules interzone-default log-end yes
+set rulebase security rules "drop quic" to any
+set rulebase security rules "drop quic" from any
+set rulebase security rules "drop quic" source any
+set rulebase security rules "drop quic" destination any
+set rulebase security rules "drop quic" source-user any
+set rulebase security rules "drop quic" category any
+set rulebase security rules "drop quic" application quic
+set rulebase security rules "drop quic" service application-default
+set rulebase security rules "drop quic" source-hip any
+set rulebase security rules "drop quic" destination-hip any
+set rulebase security rules "drop quic" action drop
+set rulebase security rules "drop quic" log-start no
+set rulebase security rules "drop quic" log-end yes
+set rulebase security rules "allow web" to any
+set rulebase security rules "allow web" from TRUST
+set rulebase security rules "allow web" source any
+set rulebase security rules "allow web" destination any
+set rulebase security rules "allow web" source-user any
+set rulebase security rules "allow web" category any
+set rulebase security rules "allow web" application [ ssl web-browsing ]
+set rulebase security rules "allow web" service application-default
+set rulebase security rules "allow web" source-hip any
+set rulebase security rules "allow web" destination-hip any
+set rulebase security rules "allow web" action allow
+set rulebase security rules "allow web" log-start no
+set rulebase security rules "allow web" log-end yes
+set rulebase security rules "allow low-medium apps" to any
+set rulebase security rules "allow low-medium apps" from TRUST
+set rulebase security rules "allow low-medium apps" source any
+set rulebase security rules "allow low-medium apps" destination any
+set rulebase security rules "allow low-medium apps" source-user any
+set rulebase security rules "allow low-medium apps" category any
+set rulebase security rules "allow low-medium apps" application LOW-MEDIUM
+set rulebase security rules "allow low-medium apps" service application-default
+set rulebase security rules "allow low-medium apps" source-hip any
+set rulebase security rules "allow low-medium apps" destination-hip any
+set rulebase security rules "allow low-medium apps" action allow
+set rulebase security rules "allow low-medium apps" log-start no
+set rulebase security rules "allow low-medium apps" log-end yes
+set rulebase security rules "allow OSPF" to any
+set rulebase security rules "allow OSPF" from any
+set rulebase security rules "allow OSPF" source any
+set rulebase security rules "allow OSPF" destination any
+set rulebase security rules "allow OSPF" source-user any
+set rulebase security rules "allow OSPF" category any
+set rulebase security rules "allow OSPF" application ospf
+set rulebase security rules "allow OSPF" service application-default
+set rulebase security rules "allow OSPF" source-hip any
+set rulebase security rules "allow OSPF" destination-hip any
+set rulebase security rules "allow OSPF" action allow
+set rulebase security rules "allow OSPF" log-start no
+set rulebase security rules "allow OSPF" log-end yes
+set rulebase security rules "allow all" to any
+set rulebase security rules "allow all" from any
+set rulebase security rules "allow all" source any
+set rulebase security rules "allow all" destination any
+set rulebase security rules "allow all" source-user any
+set rulebase security rules "allow all" category any
+set rulebase security rules "allow all" application any
+set rulebase security rules "allow all" service application-default
+set rulebase security rules "allow all" source-hip any
+set rulebase security rules "allow all" destination-hip any
+set rulebase security rules "allow all" action allow
+set rulebase security rules "allow all" log-start no
+set rulebase security rules "allow all" log-end yes
+set rulebase nat rules "ISP1 NAT" source-translation dynamic-ip-and-port interface-address interface ethernet1/1
+set rulebase nat rules "ISP1 NAT" to UNTRUST
+set rulebase nat rules "ISP1 NAT" from TRUST
+set rulebase nat rules "ISP1 NAT" source any
+set rulebase nat rules "ISP1 NAT" destination any
+set rulebase nat rules "ISP1 NAT" service any
+set rulebase nat rules "ISP1 NAT" to-interface ethernet1/1
+set import network interface [ ethernet1/1 ethernet1/2 ]
+set application-group
+set application-filter LOW-MEDIUM risk [ 1 2 3 ]
+set application
+set mgt-config users admin phash $5$gkjiltqn$RkR9Mu8qxx51/SbRxp.B0vpSU/MMktrj5zlDMxoPog4
+set mgt-config users admin permissions role-based superuser yes
+set mgt-config users __openconfig phash $5$oqnqwgth$vbINUNL/LiuneFers/8ec/dTgio12/yZdxG.ftXY0W3
+set mgt-config users __openconfig permissions role-based deviceadmin localhost.localdomain
+set mgt-config users __telemetryuser phash $5$wagbopaf$LIeLziCNlVkkV8zqrv/o5A44rJ/7AHGoz2GGM1C7oYA
+set mgt-config users __telemetryuser permissions role-based deviceadmin localhost.localdomain
+set mgt-config users lab permissions role-based superuser yes
+set mgt-config users lab phash $5$xtwnrxps$X5A/mDXHA9xuDzSzFlgV/xhiWKdhRXUNogHseUGHyg9
+set mgt-config password-complexity enabled yes
+set mgt-config password-complexity minimum-length 3
+[edit]
