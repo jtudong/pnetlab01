@@ -1,6 +1,6 @@
-Current configuration : 2028 bytes
+Current configuration : 2107 bytes
 !
-! Last configuration change at 19:13:44 UTC Sun Feb 15 2026
+! Last configuration change at 12:11:15 MST Wed Mar 18 2026
 !
 version 15.7
 service timestamps debug datetime msec localtime show-timezone year
@@ -13,11 +13,13 @@ boot-start-marker
 boot-end-marker
 !
 !
+logging buffered 32768
 !
 no aaa new-model
 !
 !
 !
+clock timezone MST -7 0
 mmi polling-interval 60
 no mmi auto-configure
 no mmi pvc
@@ -41,11 +43,16 @@ no ip icmp rate-limit unreachable
 
 
 !
+ip vrf management
 !
 !
 !
-no ip domain lookup
+!
+ip domain name shamrock.lab
+ip name-server 10.0.20.10
 ip cef
+login on-failure log
+login on-success log
 no ipv6 cef
 !
 multilink bundle-name authenticated
@@ -60,6 +67,7 @@ multilink bundle-name authenticated
 !
 username lab privilege 15 password 0 lab
 username cisco privilege 15 password 0 cisco
+username localadmin privilege 15 password 0 5ham!!r0ck
 !
 redundancy
 !
@@ -80,12 +88,14 @@ ip tcp synwait-time 5
 !
 !
 interface Ethernet0/0
- description site0-edge-s1 e0/1
- ip address 100.90.1.2 255.255.255.0
+ description ISP1 e0/1
+ ip address 100.127.0.6 255.255.255.252
  duplex auto
 !
 interface Ethernet0/1
- no ip address
+ description site0-pub-s1 e0/0
+ ip address 192.0.2.1 255.255.255.0
+ ip ospf 1 area 0.0.0.0
  duplex auto
 !
 interface Ethernet0/2
@@ -96,29 +106,18 @@ interface Ethernet0/3
  no ip address
  duplex auto
 !
-interface Ethernet1/0
- no ip address
- duplex auto
-!
-interface Ethernet1/1
- no ip address
- duplex auto
-!
-interface Ethernet1/2
- no ip address
- duplex auto
-!
-interface Ethernet1/3
- no ip address
- duplex auto
+router ospf 1
+ router-id 10.0.0.1
+ default-information originate always metric 10
 !
 router bgp 64512
- bgp router-id 100.90.1.2
+ bgp router-id 100.127.0.6
  bgp log-neighbor-changes
- neighbor 100.90.1.1 remote-as 65002
- neighbor 100.90.1.1 description ISP1
- neighbor 100.90.1.1 soft-reconfiguration inbound
- neighbor 100.90.1.1 prefix-list DEFAULT-PL in
+ network 100.127.0.4 mask 255.255.255.252
+ network 192.0.2.0
+ neighbor 100.127.0.5 remote-as 65002
+ neighbor 100.127.0.5 description ISP1
+ neighbor 100.127.0.5 soft-reconfiguration inbound
 !
 ip forward-protocol nd
 !
@@ -126,12 +125,7 @@ ip forward-protocol nd
 no ip http server
 no ip http secure-server
 !
-!
-ip prefix-list DEFAULT-PL seq 5 permit 0.0.0.0/0
 ipv6 ioam timestamp
-!
-route-map DEFAULT-RM permit 10
- match ip address prefix-list DEFAULT-PL
 !
 !
 !
@@ -149,7 +143,6 @@ line con 0
  exec-timeout 0 0
  privilege level 15
  logging synchronous
- login local
 line aux 0
  exec-timeout 0 0
  privilege level 15
@@ -159,7 +152,9 @@ line vty 0 4
  logging synchronous
  login local
  transport preferred none
- transport input telnet ssh
+ transport input ssh
 !
+ntp server time.google.com
+ntp server time2.google.com prefer
 !
 end
