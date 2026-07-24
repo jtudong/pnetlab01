@@ -1,10 +1,10 @@
-Current configuration : 1999 bytes
+Current configuration : 3190 bytes
 !
-! Last configuration change at 17:48:05 UTC Sun Feb 15 2026
+! Last configuration change at 11:41:56 MST Mon May 25 2026
 !
 version 15.7
-service timestamps debug datetime msec
-service timestamps log datetime msec
+service timestamps debug datetime msec localtime show-timezone year
+service timestamps log datetime msec localtime show-timezone year
 no service password-encryption
 !
 hostname ISP1
@@ -13,11 +13,13 @@ boot-start-marker
 boot-end-marker
 !
 !
+logging buffered 32768
 !
 no aaa new-model
 !
 !
 !
+clock timezone MST -7 0
 mmi polling-interval 60
 no mmi auto-configure
 no mmi pvc
@@ -41,11 +43,18 @@ no ip icmp rate-limit unreachable
 
 
 !
+ip vrf management
 !
 !
 !
-no ip domain lookup
+!
+ip domain name shamrock.lab
+ip name-server 208.67.222.222
+ip name-server 208.67.200.200
+ip name-server 4.2.2.1
 ip cef
+login on-failure log
+login on-success log
 no ipv6 cef
 !
 multilink bundle-name authenticated
@@ -60,6 +69,7 @@ multilink bundle-name authenticated
 !
 username lab privilege 15 password 0 lab
 username cisco privilege 15 password 0 cisco
+username localadmin privilege 15 password 0 5ham!!r0ck
 !
 redundancy
 !
@@ -81,16 +91,17 @@ ip tcp synwait-time 5
 !
 interface Ethernet0/0
  description inet e0/1
- ip address 100.90.0.2 255.255.255.0
+ ip address 100.127.0.2 255.255.255.252
  duplex auto
 !
 interface Ethernet0/1
- description site0-edge-s1 e0/0
- ip address 100.90.1.1 255.255.255.0
+ description site0-edge-r1 e0/0
+ ip address 100.127.0.5 255.255.255.252
  duplex auto
 !
 interface Ethernet0/2
- no ip address
+ description site1-pub-s1 e0/0
+ ip address 100.127.0.9 255.255.255.252
  duplex auto
 !
 interface Ethernet0/3
@@ -113,16 +124,59 @@ interface Ethernet1/3
  no ip address
  duplex auto
 !
+interface Ethernet2/0
+ no ip address
+ shutdown
+ duplex auto
+!
+interface Ethernet2/1
+ no ip address
+ shutdown
+ duplex auto
+!
+interface Ethernet2/2
+ no ip address
+ shutdown
+ duplex auto
+!
+interface Ethernet2/3
+ no ip address
+ shutdown
+ duplex auto
+!
+interface Ethernet3/0
+ no ip address
+ shutdown
+ duplex auto
+!
+interface Ethernet3/1
+ no ip address
+ shutdown
+ duplex auto
+!
+interface Ethernet3/2
+ no ip address
+ shutdown
+ duplex auto
+!
+interface Ethernet3/3
+ no ip address
+ shutdown
+ duplex auto
+!
 router bgp 65002
- bgp router-id 100.90.0.2
+ bgp router-id 100.127.0.2
  bgp log-neighbor-changes
- network 100.90.0.0 mask 255.255.255.0
- neighbor 100.90.0.1 remote-as 65001
- neighbor 100.90.0.1 description inet
- neighbor 100.90.0.1 soft-reconfiguration inbound
- neighbor 100.90.1.2 remote-as 64512
- neighbor 100.90.1.2 description site0
- neighbor 100.90.1.2 soft-reconfiguration inbound
+ network 100.127.0.0 mask 255.255.255.252
+ network 100.127.0.4 mask 255.255.255.252
+ network 100.127.0.8 mask 255.255.255.252
+ neighbor 100.127.0.1 remote-as 65001
+ neighbor 100.127.0.1 description inet
+ neighbor 100.127.0.1 soft-reconfiguration inbound
+ neighbor 100.127.0.6 remote-as 64512
+ neighbor 100.127.0.6 description site0-edge-r1
+ neighbor 100.127.0.6 soft-reconfiguration inbound
+ neighbor 100.127.0.6 route-map RM-DEFAULT out
 !
 ip forward-protocol nd
 !
@@ -130,7 +184,12 @@ ip forward-protocol nd
 no ip http server
 no ip http secure-server
 !
+!
+ip prefix-list DEFAULT-ONLY seq 5 permit 0.0.0.0/0
 ipv6 ioam timestamp
+!
+route-map RM-DEFAULT permit 10
+ match ip address prefix-list DEFAULT-ONLY
 !
 !
 !
@@ -148,7 +207,6 @@ line con 0
  exec-timeout 0 0
  privilege level 15
  logging synchronous
- login local
 line aux 0
  exec-timeout 0 0
  privilege level 15
@@ -158,7 +216,9 @@ line vty 0 4
  logging synchronous
  login local
  transport preferred none
- transport input telnet ssh
+ transport input ssh
 !
+ntp server time.google.com
+ntp server time2.google.com prefer
 !
 end
